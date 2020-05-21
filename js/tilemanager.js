@@ -1,46 +1,3 @@
-const TILEMAP = {};
-const NEIGHBOUR_OFFSETS = [
-	[0, TILE_SIZE],
-	[TILE_SIZE, 0],
-	[0, -TILE_SIZE],
-	[-TILE_SIZE, 0]
-];
-const TILEMAP_ARRAY = [];
-
-function generateRoom(width, height, offsetX, offsetY){
-	let tilemap = new Tilemap();
-	let passages = 3;
-	let wallX = rnd(4 + offsetX, height - 4 + offsetX);
-	let wallY = rnd(4 + offsetX, width - 4 + offsetY);
-	for(let x = offsetX; x < width + offsetX; x++){
-		for(let y = offsetY; y < height + offsetY; y++){
-			let xIsWall = x === wallX;
-			let yIsWall = y === wallY;
-			if(xIsWall && yIsWall){
-				tilemap.addTileDescriptor(x * TILE_SIZE, y * TILE_SIZE, "wall_cross");
-			} else if(xIsWall){
-				tilemap.addTileDescriptor(x * TILE_SIZE, y * TILE_SIZE, "wall_vertical");
-			} else if(yIsWall){
-				tilemap.addTileDescriptor(x * TILE_SIZE, y * TILE_SIZE, "wall_horizontal");
-			} else {
-				tilemap.addTileDescriptor(x * TILE_SIZE, y * TILE_SIZE, "tile");
-			}
-		}
-	}
-	let walls = [ 
-		[1 + offsetX, wallX - 1, wallY, wallY, "door_horizontal"],
-		[wallX + 1 + offsetX, width, wallY, wallY, "door_horizontal"],
-		[wallX, wallX, 1 + offsetY, wallY - 1, "door_vertical"],
-		[wallX, wallX, wallY + 1 + offsetY, height, "door_vertical"]
-	];
-	for(let i = 0; i < passages; i++){
-		let wallSection = walls.splice(rnd(walls.length), 1)[0];
-		tilemap.addTileDescriptor(rnd(wallSection[0], wallSection[1]) * TILE_SIZE, rnd(wallSection[2], wallSection[3]) * TILE_SIZE, wallSection[4]);
-	}
-	tilemap.buildTiles();
-	return tilemap;
-}
-
 class Tilemap {
 	constructor(){
 		this.map = {};
@@ -55,7 +12,8 @@ class Tilemap {
 	buildTiles(){
 		for(let i = 0; i < this.tileDescriptors.length;i++){
 			let tileDescriptor = this.tileDescriptors[i];
-			this.addTile(tileDescriptor.structureTile.build(tileDescriptor.x, tileDescriptor.y));
+			let newTile = tileDescriptor.structureTile.build(tileDescriptor.x, tileDescriptor.y);
+			this.addTile(newTile);
 		}
 	}
 	
@@ -112,6 +70,34 @@ class Tilemap {
 			this.addTile(otherArray[i]);
 		}
 	}
+	
+	mergeDescriptors(otherMap){
+		Array.prototype.push.apply(this.tileDescriptors, otherMap.tileDescriptors);
+	}
+	
+	showAllTiles(){
+		this.tileArray.forEach(function(tile){
+			tile.visible = true;
+			tile.discovered = true;
+		});
+	}
+	
+	getLeftmostTiles(){
+		let tiles = [];
+		let minX = canvas.width;
+		for(let i = 0; i < this.tileArray.length; i++){
+			let tile = this.tileArray[i];
+			if(minX === tile.x){
+				tiles.push(tile);
+			} else if(tile.x < minX){
+				tiles = [];
+				minX = tile.x;
+				tiles.push(tile);
+			}
+		}
+		return tiles;
+	}
+	
 }
 
 class TileDescriptor{
@@ -125,52 +111,104 @@ class TileDescriptor{
 	}
 }
 
-class Structure {
-	constructor(name, tiles){
-		this.name = name;
-		this.tiles = tiles;
-	}
-	
-	build(startX, startY){
-		let tilemap = new Tilemap();
-		for(let y = 0; y < this.tiles.length; y++){
-			for(let x = 0; x < this.tiles[y].length; x++){
-				let tile = this.tiles[y][x];
-				if(tile !== "empty"){
-					let structureTile = LOADED_STRUCTURE_TILES[tile];
-					let newX = startX + (x * TILE_SIZE);
-					let newY = startY + (y * TILE_SIZE);
-					if(structureTile){
-						tilemap.addTile(structureTile.build(newX, newY));
-					} else {
-						tilemap.addTile(new DecorTile(newX, newY, tile));
-					}
-				}
-			}
-		}
-		return tilemap;
-	}
-	
-}
-
-class StructureTile{
-	constructor(name, walkable, passesLight, clazz, tileImage, tileImages){
-		this.name = name;
+class Tile extends Drawable{
+	constructor(x, y, img, walkable, passesLight){
+		super(x, y, img, 2);
 		this.walkable = walkable;
 		this.passesLight = passesLight;
-		this.clazz = clazz;
-		this.tileImage = tileImage;
-		this.tileImages = tileImages;
+		this.discovered = false;
+		this.visible = false;
 	}
 	
-	build(x, y){
-		let image;
-		if(this.tileImages){
-			image = this.tileImages[rnd(0, this.tileImages.length)];
-		} else {
-			image = this.tileImage;
+	draw(){
+		if(this.visible || this.discovered){
+			super.draw();
 		}
-		return new this.clazz(x, y, image, this.walkable, this.passesLight);
+		if(this.discovered && !this.visible){
+			context.fillStyle = 'black';
+			context.globalAlpha = 0.5;
+			context.fillRect(this.x, this.y, TILE_SIZE, TILE_SIZE);
+			context.globalAlpha = 1;
+		}
 	}
 	
+	beforeStep(stepper){}
+	
+	onStep(stepper){}
+	
+	onLeave(stepper){}
+}
+
+class Door extends Tile{
+	constructor(x, y, img){
+		super(x, y, img, true, false);
+		this.closedImage = img;
+		if(this.closedImage === "door_closed_horizontal"){
+			this.closingImage = "door_closing_horizontal";
+			this.openingImage = "door_opening_horizontal";
+			this.openImage = "door_open_horizontal";
+		} else {
+			this.closingImage = "door_closing_vertical";
+			this.openingImage = "door_opening_vertical";
+			this.openImage = "door_open_vertical";
+		}
+		this.blocking = true;
+	}
+	
+	beforeStep(stepper){
+		if(this.blocking){
+			this.blocking = false;
+			stepper.canMove = false;
+			new TimedEvent(FPS, 
+				function(params){
+					params[0].canMove = true;
+					params[1].switchImageTo(params[2]);
+				},
+				[stepper, this, this.openImage]
+			);
+			this.switchImageTo(this.openingImage);
+		}
+	}
+	
+	onStep(stepper){
+		this.passesLight = true;
+	}
+	
+	onLeave(stepper){
+		this.blocking = true;
+		this.switchImageTo(this.closingImage);
+		new TimedEvent(FPS, 
+			function(params){
+				params[0].switchImageTo(params[1]);
+				params[0].passesLight = false;
+				player.playerLighting.recalculateTiles();
+			}, 
+			[this, this.closedImage]
+		);
+	}
+}
+
+class Wall extends Tile{
+	constructor(x, y, img){
+		super(x, y, img, false, false);
+	}
+}
+
+class Floor extends Tile{
+	constructor(x, y){
+		super(x, y, "tile", true, true);
+	}
+}
+
+class DecorTile extends Tile{
+	constructor(x, y, img){
+		super(x, y, img, false, false);
+		this.visible = true;
+	}
+}
+
+class ShipTileRust extends Tile{
+	constructor(x, y){
+		super(x, y, "ship_tile_rust", true, true);
+	}
 }

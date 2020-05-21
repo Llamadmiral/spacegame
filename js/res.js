@@ -1,7 +1,8 @@
 const IMAGES = [
 	{"name": "tile", "src": "img/tile.png", "anim": false},
-	{"name": "wall_horizontal", "src": "img/wall_horizontal.png", "anim": false},
-	{"name": "wall_vertical", "src": "img/wall_vertical.png", "anim": false},
+	{"name": "wall_horizontal", "src": "img/walls/wall_horizontal.png", "anim": false},
+	{"name": "wall_vertical", "src": "img/walls/wall_vertical.png", "anim": false},
+	{"name": "wall_cross", "src": "img/walls/wall_cross.png", "anim": false},
 	{"name": "player", "src": "img/player.png", "anim": false},
 	{"name": "tile_debug", "src": "img/tile_debug.png", "anim": false},
 	{"name": "door_open_horizontal", "src": "img/doors/door_open_horizontal.png", "anim": false},
@@ -19,7 +20,6 @@ const IMAGES = [
 	{"name": "ship_inner_wing_left", "src":"img/ship/ship_inner_wing_left.png","anim":false},
 	{"name": "ship_middle_wing_left", "src":"img/ship/ship_middle_wing_left.png","anim":true, "numberOfFrames":4},
 	{"name": "ship_middle_wing_right", "src":"img/ship/ship_middle_wing_right.png","anim":true, "numberOfFrames":4},
-	{"name": "wall_cross", "src": "img/wall_cross.png", "anim": false}
 ];
 
 const STRUCTURES = [
@@ -33,6 +33,7 @@ const STRUCTURES = [
 
 const STRUCTURE_TILES = [
 	{"name":"tile",			   "walkable":true,  "passesLight":true,   				  "tileImage":"tile"},
+	{"name":"tile_debug",	   "walkable":true,  "passesLight":true,   		          "tileImage":"tile_debug"},
 	{"name":"wall_horizontal", "walkable":false, "passesLight":false,  "clazz":Wall,  "tileImage":"wall_horizontal"},
 	{"name":"wall_vertical",   "walkable":false, "passesLight":false,  "clazz":Wall,  "tileImage":"wall_vertical"},
 	{"name":"wall_cross",      "walkable":false, "passesLight":false,  "clazz":Wall,  "tileImage":"wall_cross"},
