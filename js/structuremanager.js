@@ -140,7 +140,7 @@ class PlayerTransporter extends Updatable{
 	}
 	
 	update(){
-		let moveSpeed = 1;
+		let moveSpeed = TILE_SIZE;
 		if(!this.arrived){
 			if(this.dockingTile.y !== this.otherShip.dockingTile.y){
 				this.y += moveSpeed;

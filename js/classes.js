@@ -88,7 +88,8 @@ class Moveable extends Drawable{
 			let endTile = this.tilemap.getTile(x, y);
 			if(this.tilemap.tileArray.indexOf(endTile) !== -1){
 				let routeCreator = new RouteCreator(this.tilemap.tileArray, this.currentTile, endTile);
-				this.movement.path = routeCreator.createRoute();
+				let route = routeCreator.createRoute();
+				this.movement.path = flattenRoute(route, this.tilemap);
 			} else {
 				console.log('Unreachable tile!', endTile);
 			}

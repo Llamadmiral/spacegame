@@ -32,7 +32,7 @@ function $(id){
 function init(){
 	initCanvas();
 	refresh();
-	backgroundAnimation();
+	initBackgroundAnimation();
 	loadImages();
 	loadStructureTiles();
 	loadStructures();

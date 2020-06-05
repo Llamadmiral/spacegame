@@ -106,7 +106,35 @@ class Ray {
 			}
 		}
 	}
+}
+
+class SimpleRay{
+	constructor(startCoordinate, offset, tilemap){
+		this.x = startCoordinate[0];
+		this.y = startCoordinate[1];
+		this.offset = offset;
+		this.tilemap = tilemap;
+		this.traveledTiles = [];		
+	}
 	
+	cast(){
+		let c = this.offset[0] * TILE_SIZE;
+		let s = this.offset[1] * TILE_SIZE;
+		let collision = false;
+		while(this.x > 0 && this.x < canvas.width && this.y > 0 && this.y < canvas.height && !collision){
+			this.x += c;
+			this.y += s;
+			let tile = this.tilemap.getTile(this.x, this.y);
+			if(tile === undefined){
+				collision = true;
+			} else {
+				this.traveledTiles.push([tile.x, tile.y]);
+				if(!tile.walkable){
+					collision = true;
+				}
+			}
+		}
+	}
 }
 
 class Dot extends Updatable{
@@ -144,10 +172,9 @@ function normalizeToGrid(number){
 	return Math.floor(number / TILE_SIZE) * TILE_SIZE;
 }
 
-function backgroundAnimation(){
+function initBackgroundAnimation(){
+	let timedEvent = new TimedEvent(rnd(10, 20), initBackgroundAnimation);
 	spawnStars();
-	let nextSpawnTime = rnd(100, 200);
-	window.setTimeout(backgroundAnimation, nextSpawnTime);
 }
 
 function spawnStars(){
