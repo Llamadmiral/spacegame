@@ -1,3 +1,7 @@
+const MATRIX_SPACE = 0;
+const MATRIX_TILE = 1;
+const MATRIX_WALL = 2;
+
 const IMAGES = [
 	{"name": "tile", "src": "img/tile.png", "anim": false},
 	{"name": "wall_horizontal", "src": "img/walls/wall_horizontal.png", "anim": false},
@@ -37,6 +41,18 @@ const IMAGES = [
 	{"name": "ship_inner_wing_left", "src":"img/ship/ship_inner_wing_left.png","anim":false},
 	{"name": "ship_middle_wing_left", "src":"img/ship/ship_middle_wing_left.png","anim":true, "numberOfFrames":4},
 	{"name": "ship_middle_wing_right", "src":"img/ship/ship_middle_wing_right.png","anim":true, "numberOfFrames":4},
+	
+	
+	
+	
+	{"name": "TILE_Wall_Outer_EE", "src":"img/ship/TILE_Wall_Outer_EE.png", "anim":false},
+	{"name": "TILE_Wall_Outer_WE", "src":"img/ship/TILE_Wall_Outer_WE.png", "anim":false},
+	{"name": "TILE_Wall_Outer_Window_WW", "src":"img/ship/TILE_Wall_Outer_Window_WW.png", "anim":false},
+	
+	{"name": "TILE_Wall_Half_LeftBottom", "src":"img/ship/TILE_Wall_Half_LeftBottom.png", "anim": false},
+	{"name": "TILE_Wall_Outer_LeftBent_EE", "src":"img/ship/TILE_Wall_Outer_LeftBent_EE.png", "anim": false},
+	
+	{"name": "TILE_Wall_Half_WindowCorner", "src":"img/ship/TILE_Wall_Half_WindowCorner.png", "anim": false},
 ];
 
 const STRUCTURES = [
@@ -49,14 +65,26 @@ const STRUCTURES = [
 ];
 
 const STRUCTURE_TILES = [
-	{"name":"tile",			   "walkable":true,  "passesLight":true,   				  "tileImages":["TILE_Floor_Plain_A_EWWE", "TILE_Floor_Plain_B_EWWE", "TILE_Floor_Plain_C_EEWE", "TILE_Floor_Plain_D_EWWW", "TILE_Floor_Plain_E_EEWE", "TILE_Floor_Plain_F_EEWE", "TILE_Floor_Plain_G_EWWW", "TILE_Floor_Plain_H_WEWW"]},
-	{"name":"tile_debug",	   "walkable":true,  "passesLight":true,   		          "tileImage":"tile_debug"},
-	{"name":"wall_horizontal", "walkable":false, "passesLight":false,  "clazz":Wall,  "tileImage":"wall_horizontal"},
-	{"name":"wall_vertical",   "walkable":false, "passesLight":false,  "clazz":Wall,  "tileImage":"wall_vertical"},
-	{"name":"wall_cross",      "walkable":false, "passesLight":false,  "clazz":Wall,  "tileImage":"wall_cross"},
-	{"name":"ship_tile", 	   "walkable":true,  "passesLight":true,   				  "tileImages":["ship_tile_normal", "ship_tile_rust"]},
-	{"name":"door_vertical",   "walkable":true,  "passesLight":true,   "clazz": Door, "tileImage":"door_closed_vertical"},
-	{"name":"door_horizontal",  "walkable":true, "passesLight":true,   "clazz": Door, "tileImage":"door_closed_horizontal"}
+	{"name":"tile",			    			"walkable":true,  "passesLight":true,   			   "tileImages":["TILE_Floor_Plain_A_EWWE", "TILE_Floor_Plain_B_EWWE", "TILE_Floor_Plain_C_EEWE", "TILE_Floor_Plain_D_EWWW", "TILE_Floor_Plain_E_EEWE", "TILE_Floor_Plain_F_EEWE", "TILE_Floor_Plain_G_EWWW", "TILE_Floor_Plain_H_WEWW"]},
+	{"name":"tile_debug",	    			"walkable":true,  "passesLight":true,   		       "tileImage":"tile_debug"},
+	{"name":"wall_horizontal",  			"walkable":false, "passesLight":false,  "clazz":Wall,  "tileImage":"wall_horizontal"},
+	{"name":"wall_vertical",    			"walkable":false, "passesLight":false,  "clazz":Wall,  "tileImage":"wall_vertical"},
+	{"name":"wall_cross",       			"walkable":false, "passesLight":false,  "clazz":Wall,  "tileImage":"wall_cross"},
+	{"name":"ship_tile", 	    			"walkable":true,  "passesLight":true,   			   "tileImages":["ship_tile_normal", "ship_tile_rust"]},
+	{"name":"door_vertical",    			"walkable":true,  "passesLight":true,   "clazz": Door, "tileImage":"door_closed_vertical"},
+	{"name":"door_horizontal",  			"walkable":true,  "passesLight":true,   "clazz": Door, "tileImage":"door_closed_horizontal"},
+	{"name":"ship_hull_bottom", 			"walkable":false, "passesLight":false, 				   "tileImages":["TILE_Wall_Outer_EE", "TILE_Wall_Outer_WE", "TILE_Wall_Outer_Window_WW"]},
+	{"name":"ship_hull_bottom_left_corner", "walkable":false, "passesLight":false, 				   "tileImage":"TILE_Wall_Half_LeftBottom":},
+	{"name":"ship_hull_bottom_left", 		"walkable":false, "passesLight":false, 				   "tileImage":"TILE_Wall_Outer_LeftBent_EE":},
+	{"name":"ship_hull_bottom_right_corner", 		"walkable":false, "passesLight":false, 		   "tileImage":"TILE_Wall_Half_WindowCorner":},
+];
+
+const STRUCTURE_MATRIX = [
+	{"name":"ship_hull_bottom", "matrix": [[1, 1, 1], [2, 2, 2], [0, 0, 0]]},
+	{"name":"ship_hull_bottom_left_corner", "matrix":[[0, 2, 1], [0, 2, 2], [0, 0, 0]]},
+	{"name":"ship_hull_bottom_left", "matrix":[[2, 1, 1], [1, 1, 1], [0, 0, 0]]},
+	{"name":"ship_hull_bottom_right_corner", "matrix":[[1, 2, 0], [1, 1, 0], [0, 0, 0]]},
+	{"name":"ship_hull_bottom_right", "matrix":[[1, 2, 0], [1, 1, 0], [0, 0, 0]]},//TILE_Wall_Outer_WindowCorner
 ];
 
 const LOADED_STRUCTURE_TILES = {};

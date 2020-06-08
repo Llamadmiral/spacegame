@@ -31,7 +31,6 @@ function $(id){
 
 function init(){
 	initCanvas();
-	refresh();
 	initBackgroundAnimation();
 	loadImages();
 	loadStructureTiles();
@@ -39,6 +38,7 @@ function init(){
 	addEventListeners();
 	spawnPlayerTransporter();
 	nextCounterClearTime = Date.now(); + 1000;
+	refresh();
 }
 
 function spawnPlayerTransporter(){
