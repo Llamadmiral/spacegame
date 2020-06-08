@@ -42,7 +42,6 @@ function generateShip(){
 }
 
 function generateRoom(width, height, offsetX, offsetY, tileOverride = "tile"){
-	console.log('Generating room...', width, height, offsetX, offsetY);
 	let tilemap = new Tilemap();
 	let passages = 3;
 	for(let x = offsetX; x < width + offsetX; x++){

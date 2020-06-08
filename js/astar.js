@@ -113,7 +113,8 @@ class RouteCreator{
 class RouteSection{
 	constructor(section, direction){
 		this.section = section;
-		this.extendedSection = [];
+		this.forwardExtension = [];
+		this.backwardExtension = [];
 		this.direction = direction;
 	}
 	
@@ -125,8 +126,19 @@ class RouteSection{
 		this.section.push(tile);
 	}
 	
-	pushExtended(tile){
-		this.extendedSection.push(tile);
+	isColliding(otherSection){
+		//they are not parallel
+		let collide = false;
+		if(Math.abs(this.direction[0]) === Math.abs(otherSection.direction[1]) && Math.abs(this.direction[1]) === Math.abs(otherSection.direction[0])){
+			for(let i = 0; i < this.forwardExtension.length; i++){
+				for(let j = 0; j < otherSection.backwardExtension.length; j++){
+					if(this.forwardExtension[i][0] === otherSection.backwardExtension[j][0] && this.forwardExtension[i][1] === otherSection.backwardExtension[j][1]){
+						collide = [i, j];
+					}
+				}
+			}
+		}
+		return collide;
 	}
 }
 
@@ -153,13 +165,24 @@ function flattenRoute(route, tilemap){
 				}
 			}
 		}
-		extendSections(sections, tilemap);
-		crossSections(sections);
-		console.log(sections);
-		paintSections(sections);
-		stopGame();
+		if(sections.length < 3){
+			finalRoute = route;
+		} else {
+			extendSections(sections, tilemap);
+			crossSections(sections);
+			finalRoute = mergeSections(sections);
+		}
 	}
-	return route;
+	return finalRoute;
+}
+
+function mergeSections(sections){
+	let finalRoute = [];
+	for(let i = 0; i < sections.length; i++){
+		let currentSection = sections[i];
+		finalRoute = finalRoute.concat(currentSection.section);
+	}
+	return finalRoute;
 }
 
 function getNormalizedDirection(coordinateA, coordinateB){
@@ -167,20 +190,27 @@ function getNormalizedDirection(coordinateA, coordinateB){
 }
 
 function crossSections(sections){
-	let sectionStart = 0;
-	let sectionEnd = 0;
-	let sectionStartCutoff = 0;
-	let sectionEndCutoff = 0;
-	for(let rear = sections.length - 1; rear >= 0; rear--){
-		for(let front = 0; front < rear; front++){
-			if(rear !== front){
-				for(let i = 0; i < sections[rear].extendedSection.length; i++){
-					for(let j = 0; j < sections[front].extendedSection.length; j++){
-						
-					}
-				}
+	let cutStart = 0;
+	let cutEnd = 0;
+	let collide = false;
+	for(let front = 0; front < sections.length; front++){
+		for(let rear = sections.length - 1; rear > 0; rear--){
+			collide = sections[front].isColliding(sections[rear]);
+			if(collide){
+				cutStart = front;
+				cutEnd = rear;
+				break;
 			}
-		}			
+		}
+		if(collide){
+			break;
+		}
+	}
+	if(collide){
+		sections[cutStart].section = sections[cutStart].section.concat(sections[cutStart].forwardExtension.slice(0, collide[0] + 1));
+		sections[cutEnd].section = sections[cutEnd].backwardExtension.slice(0, collide[1]).reverse().concat(sections[cutEnd].section);
+		//paintSections([sections[cutStart], sections[cutEnd]]);
+		sections.splice(cutStart + 1, cutEnd - cutStart - 1);
 	}
 }
 
@@ -188,17 +218,17 @@ function extendSections(sections, tilemap){
 	for(let i = 0; i < sections.length; i++){
 		let currentSection = sections[i];
 		let reverseDirection = [currentSection.direction[0] * (-1), currentSection.direction[1] * (-1)];
-		let reverseRay = new SimpleRay(currentSection.section[0], reverseDirection, tilemap);
-		reverseRay.cast();
-		for(let j = 0; j < reverseRay.traveledTiles.length; j++){
-			let path = reverseRay.traveledTiles[j];
-			currentSection.pushExtended(path);
+		let backwardRay = new SimpleRay(currentSection.section[0], reverseDirection, tilemap);
+		backwardRay.cast();
+		for(let j = 0; j < backwardRay.traveledTiles.length; j++){
+			let path = backwardRay.traveledTiles[j];
+			currentSection.backwardExtension.push(path);
 		}
-		let ray = new SimpleRay(currentSection.getLastTile(), currentSection.direction, tilemap);
-		ray.cast();
-		for(let j = 0; j < ray.traveledTiles.length; j++){
-			let path = ray.traveledTiles[j];
-			currentSection.pushExtended(path);
+		let forwardRay = new SimpleRay(currentSection.getLastTile(), currentSection.direction, tilemap);
+		forwardRay.cast();
+		for(let j = 0; j < forwardRay.traveledTiles.length; j++){
+			let path = forwardRay.traveledTiles[j];
+			currentSection.forwardExtension.push(path);
 		}
 	}
 }
@@ -212,8 +242,11 @@ function paintSections(sections){
 			context.fillRect(currentSection.section[j][0], currentSection.section[j][1], TILE_SIZE, TILE_SIZE);
 		}
 		context.globalAlpha = 0.5;
-		for(let j = 0; j < currentSection.extendedSection.length; j++){
-			context.fillRect(currentSection.extendedSection[j][0], currentSection.extendedSection[j][1], TILE_SIZE, TILE_SIZE);
+		for(let j = 0; j < currentSection.forwardExtension.length; j++){
+			context.fillRect(currentSection.forwardExtension[j][0], currentSection.forwardExtension[j][1], TILE_SIZE, TILE_SIZE);
+		}
+		for(let j = 0; j < currentSection.backwardExtension.length; j++){
+			context.fillRect(currentSection.backwardExtension[j][0], currentSection.backwardExtension[j][1], TILE_SIZE, TILE_SIZE);
 		}
 		context.globalAlpha = 1;
 	}
