@@ -35,6 +35,7 @@ function init(){
 	loadImages();
 	loadStructureTiles();
 	loadStructures();
+	loadStructureMatrixes();
 	addEventListeners();
 	spawnPlayerTransporter();
 	nextCounterClearTime = Date.now(); + 1000;
