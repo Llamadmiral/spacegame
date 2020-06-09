@@ -44,7 +44,7 @@ function init(){
 }
 
 function spawnPlayerTransporter(){
-	new PlayerTransporter(2 * TILE_SIZE, 0);
+	new PlayerTransporter();
 }
 
 function addEventListeners(){

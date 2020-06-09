@@ -71,7 +71,7 @@ function addWalls(ship){
 		if(structure){
 			walls.addTileDescriptor(surroundingTiles[i][0], surroundingTiles[i][1], structure);
 		} else {
-			console.log('Could not find matrix structure for matrix: ' + matrixStructure);
+			//console.log('Could not find matrix structure for matrix: ' + matrixStructure);
 		}
 	}
 	ship.mergeDescriptors(walls);
@@ -202,34 +202,35 @@ class Ship extends Tilemap{
 }
 
 class PlayerTransporter extends Updatable{
-	constructor(x, y){
+	constructor(){
 		super();
-		this.x = x;
-		this.y = y;
-		this.ship = LOADED_STRUCTURES["player_ship"].build(this.x, this.y);
-		this.ship.showAllTiles();
 		this.arrived = false;
 		this.startedDocking = false;
-		this.dockingTile = this.ship.getTile(this.x + TILE_SIZE * 6, 0);
 		this.otherShip = generateShip();
 		this.otherShip.build();
 		this.otherShip.showAllTiles();
+		this.x = this.otherShip.dockingTile.x - (TILE_SIZE * 15) - (TILE_SIZE * 6);
+		this.y = this.otherShip.dockingTile.y - (TILE_SIZE * 15);
+		this.ship = LOADED_STRUCTURES["player_ship"].build(this.x, this.y);
+		this.dockingTile = this.ship.getTile(this.x + TILE_SIZE * 6, this.y);
 		player = new Player(this.x + 2 * TILE_SIZE, this.y, this.ship);
+		this.ship.showAllTiles();
 	}
 	
 	update(){
 		let moveSpeed = 1;
 		if(!this.arrived){
-			if(this.dockingTile.y !== this.otherShip.dockingTile.y){
-				this.y += moveSpeed;
-				player.y += moveSpeed;
-				this.ship.move(0, moveSpeed);
-			}
+			let offsetX = 0;
+			let offsetY = 0;
 			if(this.dockingTile.x !== this.otherShip.dockingTile.x - (6 * TILE_SIZE)){
-				this.x += moveSpeed;
-				player.x += moveSpeed;
-				this.ship.move(moveSpeed, 0);
+				offsetX = 1;
 			}
+			if(this.dockingTile.y !== this.otherShip.dockingTile.y){
+				offsetY = 1;
+			}
+			this.ship.move(offsetX, offsetY);
+			player.x += offsetX;
+			player.y += offsetY;
 			if(this.dockingTile.y === this.otherShip.dockingTile.y && this.dockingTile.x === this.otherShip.dockingTile.x - (6 * TILE_SIZE)) {
 				this.arrived = true;
 			}
