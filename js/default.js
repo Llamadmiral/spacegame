@@ -13,7 +13,7 @@ let currentFrame = 0;
 let player = null;
 let stopRefresh = false;
 let mainTileMap = null;
-let ship = null;
+let camera = null;
 
 
 function stopGame(){
@@ -31,6 +31,7 @@ function $(id){
 
 function init(){
 	initCanvas();
+	initCamera();
 	initBackgroundAnimation();
 	loadImages();
 	loadStructureTiles();
@@ -51,8 +52,8 @@ function addEventListeners(){
 }
 
 function mouseClick(evt){
-	let x = Math.floor(evt.clientX / TILE_SIZE) * TILE_SIZE;
-	let y = Math.floor(evt.clientY / TILE_SIZE) * TILE_SIZE;
+	let x = normalizeToGrid(evt.clientX + camera.x);
+	let y = normalizeToGrid(evt.clientY + camera.y);
 	if(!evt.ctrlKey){
 		player.prepareMove(x, y);
 	} else {
@@ -101,11 +102,14 @@ function initCanvas(){
 	context.fillRect(0, 0, canvas.width, canvas.height);
 }
 
+function initCamera(){
+	camera = new Camera(0, 0);
+}
+
 function refresh(){
 	if(!stopRefresh){
 		let now = Date.now();
 		if(nextCounterClearTime < now){
-		//console.log(fpsCounter);
 			fpsCounter = 0;
 			nextCounterClearTime = now + 1000;
 		}
@@ -117,7 +121,9 @@ function refresh(){
 		for(let i = 0; i < UPDATABLE_OBJECTS.length; i++){
 			let object = UPDATABLE_OBJECTS[i];
 			object.update();
-			object.draw();
+			if(object.toDraw()){
+				object.draw();
+			}
 		}
 		window.setTimeout(refresh, FRAMERATE);
 	}

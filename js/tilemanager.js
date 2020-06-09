@@ -60,10 +60,8 @@ class Tilemap {
 			let neighbour = this.getTileDescriptor(neighbourX, neighbourY);
 			if(!neighbour){
 				matrixStructure.push(MATRIX_SPACE);
-			} else if(neighbour.structureTile.walkable){
-				matrixStructure.push(MATRIX_TILE);
 			} else {
-				matrixStructure.push(MATRIX_WALL);
+				matrixStructure.push(MATRIX_TILE);
 			}
 		}
 		return matrixStructure;
@@ -108,10 +106,11 @@ class Tilemap {
 		return tile;
 	}
 	
-	move(x, y){
-		for(let i = 0; i < this.tileArray.length; i++){
-			this.tileArray[i].x += x;
-			this.tileArray[i].y += y;
+	move(x, y, onDescriptor = false){
+		let arrayToUse = onDescriptor ? this.tileDescriptors : this.tileArray;
+		for(let i = 0; i < arrayToUse.length; i++){
+			arrayToUse[i].x += x;
+			arrayToUse[i].y += y;
 		}
 	}
 	
@@ -158,6 +157,30 @@ class Tilemap {
 		return tiles;
 	}
 	
+	getWidthAndHeight(useDescriptors = false){
+		let minX = canvas.width;
+		let minY = canvas.height;
+		let maxX = 0;
+		let maxY = 0;
+		let arrayToUse = useDescriptors ?  this.tileDescriptors : this.tileArray;
+		for(let i = 0; i < arrayToUse.length; i++){
+			let tile = arrayToUse[i];
+			if(minX > tile.x){
+				minX = tile.x;
+			}
+			if(minY > tile.y){
+				minY = tile.y;
+			}
+			if(maxX < tile.x){
+				maxX = tile.x;
+			}
+			if(maxY < tile.y){
+				maxY = tile.y;
+			}
+		}
+		return [maxX - minX, maxY - minY];
+	}
+	
 }
 
 class TileDescriptor{
@@ -178,6 +201,7 @@ class Tile extends Drawable{
 		this.passesLight = passesLight;
 		this.discovered = false;
 		this.visible = false;
+		this.fogOfWarEffect = undefined;
 	}
 	
 	draw(){
@@ -185,10 +209,15 @@ class Tile extends Drawable{
 			super.draw();
 		}
 		if(this.discovered && !this.visible){
-			context.fillStyle = 'black';
-			context.globalAlpha = 0.5;
-			context.fillRect(this.x, this.y, TILE_SIZE, TILE_SIZE);
-			context.globalAlpha = 1;
+			if(!this.fogOfWarEffect){
+				this.fogOfWarEffect = new FogOfWarEffect(this);
+			}
+		}
+		if(this.discovered && this.visible){
+			if(this.fogOfWarEffect){
+				this.fogOfWarEffect.destroy();
+				this.fogOfWarEffect = undefined;
+			}
 		}
 	}
 	

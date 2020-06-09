@@ -12,23 +12,48 @@ class PathEffect extends Updatable{
 		if(this.moveable.movement.path.length > 0){
 			context.strokeStyle = 'cyan';
 			context.beginPath();
-			let x = this.moveable.x;
-			let y = this.moveable.y;
+			let x = this.moveable.x - camera.x;
+			let y = this.moveable.y - camera.y;
 			context.moveTo(x + HALF_TILE, y + HALF_TILE);
 			for(let i = 0; i < this.moveable.movement.path.length; i++){
 				let step = this.moveable.movement.path[i];
-				x = step[0];
-				y = step[1];
+				x = step[0] - camera.x;
+				y = step[1] - camera.y;
 				context.lineTo(x + HALF_TILE, y + HALF_TILE);
 			}
 			if(this.dot === undefined){
 				this.dot = new Dot(x + HALF_TILE, y + HALF_TILE, 3, 'cyan', 11);
+			} else {
+				this.dot.x = x + HALF_TILE;
+				this.dot.y = y + HALF_TILE;
 			}
 			context.stroke();
 		} else if(this.dot){
 			this.dot.destroy();
 			this.dot = undefined;
 		}
+	}
+	
+	toDraw(){
+		return true;
+	}
+}
+
+class FogOfWarEffect extends Updatable {
+	constructor(tile){
+		super(tile.z + 1);
+		this.tile = tile;
+	}
+	
+	draw(){
+		context.fillStyle = 'black';
+		context.globalAlpha = 0.5;
+		context.fillRect(this.tile.x - camera.x, this.tile.y - camera.y, TILE_SIZE, TILE_SIZE);
+		context.globalAlpha = 1;
+	}
+	
+	toDraw(){
+		return true;
 	}
 }
 
@@ -91,7 +116,7 @@ class Ray {
 		let c = Math.cos(this.angle);
 		let collision = false;
 		let distance = 0;
-		while(this.x > 0 && this.x < canvas.width && this.y > 0 && this.y < canvas.height && !collision && distance < 5 * TILE_SIZE){
+		while(!collision && distance < 5 * TILE_SIZE){
 			this.x += c;
 			this.y += s;
 			distance = manhattanDistance(this.startX, this.startY, this.x, this.y);
@@ -151,6 +176,10 @@ class Dot extends Updatable{
 		context.arc(this.x, this.y, this.r, 0, 2 * Math.PI);
 		context.fillStyle = this.color;
 		context.fill();
+	}
+	
+	toDraw(){
+		return true;
 	}
 }
 

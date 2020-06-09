@@ -5,40 +5,51 @@ const NEIGHBOUR_OFFSETS = [
 	[0, -TILE_SIZE],
 	[-TILE_SIZE, 0]
 ];
+
+const MAX_ROOM_DIMENSION = 11 + 1;
+const MIN_ROOM_DIMENSION = 3;
+const MAX_ROOM_OFFSET = 6 + 1;
+const MIN_ROOM_OFFSET = 0 + 1;
+
 const TILEMAP_ARRAY = [];
 
 function generateShip(){
-	let shipHeight = rnd(7, 12);
-	let shipWidth = Math.floor(shipHeight *  2);
 	let ship = new Ship();
+	let numberOfRooms = rnd(10, 12);
+	let rooms = [];
 	
-	let shipCenterX = (normalizeToGrid(canvas.width / 2) / TILE_SIZE);
-	let shipCenterY = (normalizeToGrid(canvas.height / 2) / TILE_SIZE);
-	
-	let shipOffsetX = shipCenterX - Math.floor(shipWidth / 2);
-	let shipOffsetY = shipCenterY - Math.floor(shipHeight / 2);
-	
-	let mainCorridor = generateRoom(shipWidth, shipHeight, shipOffsetX, shipOffsetY);
-	
-	ship.mergeDescriptors(mainCorridor);
-	
-	let numberOfRooms = 4;
-	let roomOffsets = [
-		[-1, -1, 0, 0], 
-		[1, -1, -1, 0], 
-		[1, 1, -1, -1],
-		[-1, 1, 0, -1]
-	];
 	for(let i = 0; i < numberOfRooms; i++){
-		let offset = roomOffsets.splice(rnd(0, roomOffsets.length), 1)[0];
-		let roomWidth = rnd(5, 10);
-		let roomHeight = rnd(5, 7);
-		let roomCenterX = shipCenterX + (Math.floor(shipWidth / 2) * offset[0]);
-		let roomCenterY = shipCenterY + (Math.floor(shipHeight / 2) * offset[1]);
-		let room = generateRoom(roomWidth, roomHeight, roomCenterX + ((roomWidth * offset[2])) + offset[0], roomCenterY + ((roomHeight * offset[3])) + offset[1]);
+		let roomX = rnd(MIN_ROOM_OFFSET, MAX_ROOM_OFFSET);
+		let roomY = rnd(MIN_ROOM_OFFSET, MAX_ROOM_OFFSET);
+		let roomWidth = rnd(MIN_ROOM_DIMENSION, MAX_ROOM_DIMENSION);
+		let roomHeight = rnd(MIN_ROOM_DIMENSION, MAX_ROOM_DIMENSION);
+		let room = new Box(roomX, roomY, roomWidth, roomHeight);
+		if(rooms.length === 0){
+			rooms.push(room);
+		} else {
+			let directionToStickTo = rnd(0, 4);
+			let collidesWithOthers = room.doCollideMultiple(rooms);
+			if(!collidesWithOthers){
+				rooms.push(room);
+			} else {
+				let offset = DIRECTIONS[directionToStickTo];
+				while(collidesWithOthers){
+					room.move(offset[0], offset[1]);
+					collidesWithOthers = room.doCollideMultiple(rooms);
+				}
+				rooms.push(room);
+			}
+		}
+	}
+	for(let i = 0; i < rooms.length; i++){
+		let room = generateRoom(rooms[i]);
 		ship.mergeDescriptors(room);
 	}
+	let widthAndHeight = ship.getWidthAndHeight(true);
+	let offsetX = normalizeToGrid((canvas.width / 1.2) - (widthAndHeight[0] / 2));
+	let offsetY = normalizeToGrid((canvas.height / 2) - (widthAndHeight[1] / 2));
 	addWalls(ship);
+	ship.move(offsetX, offsetY, true);
 	return ship;
 }
 
@@ -66,15 +77,46 @@ function addWalls(ship){
 	ship.mergeDescriptors(walls);
 }
 
-function generateRoom(width, height, offsetX, offsetY, tileOverride = "tile"){
+function generateRoom(box){
 	let tilemap = new Tilemap();
-	let passages = 3;
-	for(let x = offsetX; x < width + offsetX; x++){
-		for(let y = offsetY; y < height + offsetY; y++){
+	for(let x = box.x; x < box.width + box.x; x++){
+		for(let y = box.y; y < box.height + box.y; y++){
 			tilemap.addTileDescriptor(x * TILE_SIZE, y *  TILE_SIZE, "tile");
 		}
 	}
 	return tilemap;
+}
+
+class Box {
+	constructor(x, y, width, height){
+		this.x = x;
+		this.y = y;
+		this.width = width;
+		this.height = height;
+	}
+	
+	doCollide(otherBox){
+		return this.x < otherBox.x + otherBox.width &&
+			   this.x + this.width > otherBox.x &&
+			   this.y < otherBox.y + otherBox.height &&
+			   this.y + this.height > otherBox.y;
+	}
+	
+	doCollideMultiple(otherBoxes){
+		let collides = false;
+		for(let i = 0; i < otherBoxes.length; i++){
+			collides = this.doCollide(otherBoxes[i]);
+			if(collides){
+				break;
+			}
+		}
+		return collides;
+	}
+	
+	move(x, y){
+		this.x += x;
+		this.y += y;
+	}
 }
 
 class Structure {
@@ -176,7 +218,7 @@ class PlayerTransporter extends Updatable{
 	}
 	
 	update(){
-		let moveSpeed = TILE_SIZE;
+		let moveSpeed = 1;
 		if(!this.arrived){
 			if(this.dockingTile.y !== this.otherShip.dockingTile.y){
 				this.y += moveSpeed;

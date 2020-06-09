@@ -15,6 +15,10 @@ class Updatable{
 		UPDATABLE_OBJECTS.splice(UPDATABLE_OBJECTS.indexOf(this), 1);
 	}
 	
+	toDraw(){
+		return false;
+	}
+	
 }
 
 class Drawable extends Updatable{
@@ -31,11 +35,15 @@ class Drawable extends Updatable{
 	
 	draw(){
 		this.imageObject.animate();
-		context.drawImage(this.imageObject.descriptor.img, this.imageObject.currentFrame * TILE_SIZE, 0, TILE_SIZE, TILE_SIZE, this.x, this.y, TILE_SIZE, TILE_SIZE);
+		context.drawImage(this.imageObject.descriptor.img, this.imageObject.currentFrame * TILE_SIZE, 0, TILE_SIZE, TILE_SIZE, this.x - camera.x, this.y - camera.y, TILE_SIZE, TILE_SIZE);
 	}
 	
 	switchImageTo(imageName){
 		this.imageObject = new ImageObject(LOADED_IMAGES[imageName]);
+	}
+	
+	toDraw(){
+		return this.x >= camera.x && this.x < camera.x + camera.width && this.y >= camera.y && this.y < camera.y + camera.height;
 	}
 }
 
