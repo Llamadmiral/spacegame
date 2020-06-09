@@ -84,6 +84,13 @@ function loadStructures(){
 	}
 }
 
+function loadStructureMatrixes(){
+	for(let i = 0; i < STRUCTURE_MATRIX.length; i++){
+		let blueprint = STRUCTURE_MATRIX[i];
+		LOADED_STRUCTURE_MATRIXES[blueprint.name] = new StructureMatrix(blueprint.name, blueprint.matrix);
+	}
+}
+
 function initCanvas(){
 	canvas = $('canvas');
 	context = canvas.getContext('2d');

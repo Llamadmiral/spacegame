@@ -1,3 +1,9 @@
+const MATRIX_OFFSET = [
+	[-1, -1], [0, -1], [1, -1],
+	[-1, 0], [0, 0], [1, 0],
+	[-1, 1], [0, 1], [1, 1]
+];
+
 class Tilemap {
 	constructor(){
 		this.map = {};
@@ -7,6 +13,60 @@ class Tilemap {
 	
 	addTileDescriptor(x, y, structureTile){
 		this.tileDescriptors.push(new TileDescriptor(x, y, structureTile));
+	}
+	
+	getTileDescriptor(x, y){
+		let descriptor = null;
+		for(let i = 0; i < this.tileDescriptors.length; i++){
+			let currentDescriptor = this.tileDescriptors[i];
+			if(currentDescriptor.x === x && currentDescriptor.y === y){
+				descriptor = currentDescriptor;
+				break;
+			}
+		}
+		return descriptor;
+	}
+	
+	getSurroundingTilesOfDescriptors(){
+		let surroundingTiles = [];
+		for(let i = 0; i < this.tileDescriptors.length; i++){
+			let currentDescriptor = this.tileDescriptors[i];
+			for(let offset = 0; offset < MATRIX_OFFSET.length; offset++){
+				let neighbourX = currentDescriptor.x + MATRIX_OFFSET[offset][0] * TILE_SIZE;
+				let neighbourY = currentDescriptor.y + MATRIX_OFFSET[offset][1] * TILE_SIZE;
+				let neighbour = this.getTileDescriptor(neighbourX, neighbourY);
+				if(!neighbour){
+					let alreadyContains = false;
+					for(let j = 0; j < surroundingTiles.length; j++){
+						if(surroundingTiles[j][0] === neighbourX && surroundingTiles[j][1] === neighbourY){
+							alreadyContains = true;
+							break;
+						}
+					}
+					if(!alreadyContains){
+						surroundingTiles.push([neighbourX, neighbourY]);
+					}
+				}
+			}
+		}
+		return surroundingTiles;
+	}
+	
+	getMatrixStructure(x, y){
+		let matrixStructure = [];
+		for(let offset = 0; offset < MATRIX_OFFSET.length; offset++){
+			let neighbourX = x + MATRIX_OFFSET[offset][0] * TILE_SIZE;
+			let neighbourY = y + MATRIX_OFFSET[offset][1] * TILE_SIZE;
+			let neighbour = this.getTileDescriptor(neighbourX, neighbourY);
+			if(!neighbour){
+				matrixStructure.push(MATRIX_SPACE);
+			} else if(neighbour.structureTile.walkable){
+				matrixStructure.push(MATRIX_TILE);
+			} else {
+				matrixStructure.push(MATRIX_WALL);
+			}
+		}
+		return matrixStructure;
 	}
 	
 	buildTiles(){

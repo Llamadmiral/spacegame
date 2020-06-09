@@ -22,7 +22,7 @@ function generateShip(){
 	
 	ship.mergeDescriptors(mainCorridor);
 	
-	let numberOfRooms = 4;//rnd(1, 4);
+	let numberOfRooms = 4;
 	let roomOffsets = [
 		[-1, -1, 0, 0], 
 		[1, -1, -1, 0], 
@@ -38,7 +38,32 @@ function generateShip(){
 		let room = generateRoom(roomWidth, roomHeight, roomCenterX + ((roomWidth * offset[2])) + offset[0], roomCenterY + ((roomHeight * offset[3])) + offset[1]);
 		ship.mergeDescriptors(room);
 	}
+	addWalls(ship);
 	return ship;
+}
+
+function addWalls(ship){
+	let surroundingTiles = ship.getSurroundingTilesOfDescriptors();
+	let walls = new Tilemap();
+	for(let i = 0; i < surroundingTiles.length; i++){
+		let matrixStructure = ship.getMatrixStructure(surroundingTiles[i][0], surroundingTiles[i][1]);
+		let structure = null;
+		for(let key in LOADED_STRUCTURE_MATRIXES){
+			if(LOADED_STRUCTURE_MATRIXES.hasOwnProperty(key)){
+				let matches = LOADED_STRUCTURE_MATRIXES[key].matches(matrixStructure);
+				if(matches){
+					structure = key;
+					break;
+				}
+			}
+		}
+		if(structure){
+			walls.addTileDescriptor(surroundingTiles[i][0], surroundingTiles[i][1], structure);
+		} else {
+			console.log('Could not find matrix structure for matrix: ' + matrixStructure);
+		}
+	}
+	ship.mergeDescriptors(walls);
 }
 
 function generateRoom(width, height, offsetX, offsetY, tileOverride = "tile"){
@@ -46,11 +71,6 @@ function generateRoom(width, height, offsetX, offsetY, tileOverride = "tile"){
 	let passages = 3;
 	for(let x = offsetX; x < width + offsetX; x++){
 		for(let y = offsetY; y < height + offsetY; y++){
-			/*if(x === offsetX || x === offsetX + width - 1 || y === offsetY || y === offsetY + offsetY - 1){
-				tilemap.addTileDescriptor(x * TILE_SIZE, y *  TILE_SIZE, "wall_cross");
-			} else {
-				tilemap.addTileDescriptor(x * TILE_SIZE, y *  TILE_SIZE, "tile");
-			}*/
 			tilemap.addTileDescriptor(x * TILE_SIZE, y *  TILE_SIZE, "tile");
 		}
 	}
@@ -82,7 +102,6 @@ class Structure {
 		}
 		return tilemap;
 	}
-	
 }
 
 class StructureTile{
@@ -103,6 +122,24 @@ class StructureTile{
 			image = this.tileImage;
 		}
 		return new this.clazz(x, y, image, this.walkable, this.passesLight);
+	}
+}
+
+class StructureMatrix{
+	constructor(name, matrix){
+		this.name = name;
+		this.matrix = matrix;
+	}
+	
+	matches(otherMatrix){
+		let matches = true;
+		for(let i = 0; i < this.matrix.length; i++){
+			if(this.matrix[i] !== -1 && this.matrix[i] !== otherMatrix[i]){
+				matches = false;
+				break;
+			}
+		}
+		return matches;
 	}
 }
 

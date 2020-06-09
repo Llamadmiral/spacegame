@@ -72,6 +72,7 @@ const IMAGES = [
 	
 	{"name": "TILE_Wall_Half_Left", "src":"img/ship/TILE_Wall_Half_Left.png", "anim": false},
 	{"name": "TILE_Wall_Half_Right", "src":"img/ship/TILE_Wall_Half_Right.png", "anim": false},
+	{"name": "TILE_Wall_Half_Right_Pipe", "src":"img/ship/TILE_Wall_Half_Right_Pipe.png", "anim": false},
 ];
 
 const STRUCTURES = [
@@ -107,20 +108,21 @@ const STRUCTURE_TILES = [
 ];
 
 const STRUCTURE_MATRIX = [
-	{"name":"ship_hull_left", 				 "matrix": [[-1, 2, -1], [0, 2, 1], [-1, 2, -1]]},
-	{"name":"ship_hull_top", 				 "matrix": [[0, 0, 0], [2, 2, 2], [1, 1, 1]]},
-	{"name":"ship_hull_right", 				 "matrix": [[-1, 2, -1], [1, 2, 0], [-1, 2, -1]]},
-	{"name":"ship_hull_bottom", 			 "matrix": [[1, 1, 1], [2, 2, 2], [0, 0, 0]]},
-	{"name":"ship_hull_bottom_left_corner",  "matrix": [[0, 2, 1], [0, 2, 2], [0, 0, 0]]},
-	{"name":"ship_hull_bottom_left", 		 "matrix": [[2, 1, 1], [1, 1, 1], [0, 0, 0]]},
-	{"name":"ship_hull_bottom_right_corner", "matrix": [[1, 2, 0], [1, 1, 0], [0, 0, 0]]},
-	{"name":"ship_hull_bottom_right", 	  	 "matrix": [[1, 2, 0], [1, 1, 0], [0, 0, 0]]},
-	{"name":"ship_hull_top_left_corner",     "matrix": [[0,0,0], [0, 2, 2], [0, 2, 1]]},
-	{"name":"ship_hull_top_left", 		     "matrix": [[0,0,0], [2, 2, 2], [2, 1, 1]]},
-	{"name":"ship_hull_top_right_corner",    "matrix": [[0,0,0], [2, 2, 0], [1, 2, 0]]},
-	{"name":"ship_hull_top_right", 			 "matrix": [[0,0,0], [2, 2, 2], [1, 1, 2]]},
+	{"name":"ship_hull_left", 				 "matrix": [0, 0, -1, 0, 0, 1, 0, 0, -1]},
+	{"name":"ship_hull_top", 				 "matrix": [0, 0, 0, 0, 0, 0, 1, 1, 1]},
+	{"name":"ship_hull_right", 				 "matrix": [-1, 0, 0, 1, 0, 0, -1, 0, 0]},
+	{"name":"ship_hull_bottom", 			 "matrix": [1, 1, 1, 0, 0, 0, 0, 0, 0]},
+	{"name":"ship_hull_bottom_left_corner",  "matrix": [0, 0, 1, 0, 0, 0, 0, 0, 0]},
+	{"name":"ship_hull_bottom_left", 		 "matrix": [0, 1, 1, 0, 0, 0, 0, 0, 0]},
+	{"name":"ship_hull_bottom_right_corner", "matrix": [1, 0, 0, 0, 0, 0, 0, 0, 0]},
+	{"name":"ship_hull_bottom_right", 	  	 "matrix": [1, 1, 0, 0, 0, 0, 0, 0, 0]},
+	{"name":"ship_hull_top_left_corner",     "matrix": [0, 0, 0, 0, 0, 0, 0, 0, 1]},
+	{"name":"ship_hull_top_left", 		     "matrix": [0, 0, 0, 0, 0, 0, 0, 1, 1]},
+	{"name":"ship_hull_top_right_corner",    "matrix": [0, 0, 0, 0, 0, 0, 1, 0, 0]},
+	{"name":"ship_hull_top_right", 			 "matrix": [0, 0, 0, 0, 0, 0, 1, 1, 0]},
 ];
 
 const LOADED_STRUCTURE_TILES = {};
 const LOADED_IMAGES = {};
 const LOADED_STRUCTURES = {};
+const LOADED_STRUCTURE_MATRIXES = {};
