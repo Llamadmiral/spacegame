@@ -60,8 +60,10 @@ class Tilemap {
 			let neighbour = this.getTileDescriptor(neighbourX, neighbourY);
 			if(!neighbour){
 				matrixStructure.push(MATRIX_SPACE);
-			} else {
+			} else if(neighbour.structureTile.walkable){
 				matrixStructure.push(MATRIX_TILE);
+			} else {
+				matrixStructure.push(MATRIX_WALL);
 			}
 		}
 		return matrixStructure;
@@ -231,31 +233,23 @@ class Tile extends Drawable{
 class Door extends Tile{
 	constructor(x, y, img){
 		super(x, y, img, true, false);
-		this.closedImage = img;
-		if(this.closedImage === "door_closed_horizontal"){
-			this.closingImage = "door_closing_horizontal";
-			this.openingImage = "door_opening_horizontal";
-			this.openImage = "door_open_horizontal";
-		} else {
-			this.closingImage = "door_closing_vertical";
-			this.openingImage = "door_opening_vertical";
-			this.openImage = "door_open_vertical";
-		}
 		this.blocking = true;
+		this.triggerDoorEnter = new Trigger(this, "onDoorEnter");
+		this.triggerDoorLeave = new Trigger(this, "onDoorLeave");
+		this.openLength = this.descriptor.animationLength;
 	}
 	
 	beforeStep(stepper){
 		if(this.blocking){
+			this.triggerDoorEnter.trigger();
 			this.blocking = false;
 			stepper.canMove = false;
-			new TimedEvent(FPS, 
+			new TimedEvent(this.openLength, 
 				function(params){
 					params[0].canMove = true;
-					params[1].switchImageTo(params[2]);
 				},
-				[stepper, this, this.openImage]
+				[stepper, this]
 			);
-			this.switchImageTo(this.openingImage);
 		}
 	}
 	
@@ -265,14 +259,13 @@ class Door extends Tile{
 	
 	onLeave(stepper){
 		this.blocking = true;
-		this.switchImageTo(this.closingImage);
-		new TimedEvent(FPS, 
+		this.triggerDoorLeave.trigger();
+		new TimedEvent(this.openLength, 
 			function(params){
-				params[0].switchImageTo(params[1]);
-				params[0].passesLight = false;
+				params.passesLight = false;
 				player.playerLighting.recalculateTiles();
 			}, 
-			[this, this.closedImage]
+			this
 		);
 	}
 }

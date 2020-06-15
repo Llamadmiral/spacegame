@@ -194,11 +194,28 @@ class Ship extends Tilemap{
 	build(){
 		this.buildTiles();
 		let possibleDockingTiles = this.getLeftmostTiles();
-		let dockingTile = possibleDockingTiles.splice(rnd(0, possibleDockingTiles.length),1)[0];
-		this.dockingTile = LOADED_STRUCTURE_TILES["door_vertical"].build(dockingTile.x, dockingTile.y);
-		this.addTile(this.dockingTile);
+		let foundDockingTile = false;
+		for(let i = 0; i < possibleDockingTiles.length; i++){
+			let matrixStructure = this.getMatrixStructure(possibleDockingTiles[i].x, possibleDockingTiles[i].y);
+			let matches = LOADED_STRUCTURE_MATRIXES["docking_door_vertical"].matches(matrixStructure);
+			if(matches){
+				foundDockingTile = true;
+				this.dockingTile = LOADED_STRUCTURE_TILES["docking_door_vertical"].build(possibleDockingTiles[i].x, possibleDockingTiles[i].y);
+				let dockingTopTile = LOADED_STRUCTURE_TILES["docking_door_vertical_top"].build(this.dockingTile.x, this.dockingTile.y - TILE_SIZE);
+				let dockingBottomTile = LOADED_STRUCTURE_TILES["docking_door_vertical_bottom"].build(this.dockingTile.x, this.dockingTile.y + TILE_SIZE);
+				this.addTile(this.dockingTile);
+				this.addTile(dockingTopTile);
+				this.addTile(dockingBottomTile);
+				let dockingAnimationGroup = new DockingDoorAnimation([this.dockingTile, dockingTopTile, dockingBottomTile]);
+				new Observer(this.dockingTile, dockingAnimationGroup, "onDoorEnter", dockingAnimationGroup.open);
+				new Observer(this.dockingTile, dockingAnimationGroup, "onDoorLeave", dockingAnimationGroup.close);
+				break;
+			}
+		}
+		if(!foundDockingTile){
+			console.log('Could not find docking tile...');
+		}
 	}
-	
 }
 
 class PlayerTransporter extends Updatable{

@@ -1,8 +1,5 @@
 class Updatable{
-	constructor(z){
-		if(z === undefined){
-			z = 0;
-		}
+	constructor(z = 0){
 		this.z = z;
 		addToUpdatable(this);
 	}
@@ -30,45 +27,108 @@ class Drawable extends Updatable{
 		if(!descriptor){
 			console.log("Image is without Image descriptor!", imageName);
 		}
-		this.imageObject = new ImageObject(descriptor);
+		this.descriptor = descriptor;
+		this.currentFrame = 0;
+		this.counter = 0;
+		this.inAnimation = true;
 	}
 	
 	draw(){
-		this.imageObject.animate();
-		context.drawImage(this.imageObject.descriptor.img, this.imageObject.currentFrame * TILE_SIZE, 0, TILE_SIZE, TILE_SIZE, this.x - camera.x, this.y - camera.y, TILE_SIZE, TILE_SIZE);
+		if(this.descriptor.animated && this.inAnimation){
+			this.animate();
+		}
+		context.drawImage(this.descriptor.img, this.currentFrame * TILE_SIZE, 0, TILE_SIZE, TILE_SIZE, this.x - camera.x, this.y - camera.y, TILE_SIZE, TILE_SIZE);
 	}
 	
 	switchImageTo(imageName){
-		this.imageObject = new ImageObject(LOADED_IMAGES[imageName]);
+		this.descriptor = LOADED_IMAGES[imageName];
+		this.currentFrame = 0;
+		this.counter = 0;
 	}
 	
 	toDraw(){
 		return this.x >= camera.x && this.x < camera.x + camera.width && this.y >= camera.y && this.y < camera.y + camera.height;
 	}
+	
+	animate(direction = 1){
+		this.counter = (this.counter + direction) % this.descriptor.animationLength;
+		this.currentFrame = Math.floor(this.counter / this.descriptor.framerate);
+	}
 }
 
 class ImageDescriptor{
-	constructor(name, img, animated, numberOfFrames){
+	constructor(name, img, animated, numberOfFrames, animationLength){
 		this.name = name;
 		this.img = img;
 		this.animated = animated;
 		this.numberOfFrames = numberOfFrames;
+		this.animationLength = animationLength;
+		this.framerate = this.animationLength / this.numberOfFrames;
 	}
 }
 
-class ImageObject{
-	constructor(descriptor){
-		this.descriptor = descriptor;
-		this.currentFrame = 0;
-		this.counter = 0;
-		this.framerate = FPS / this.descriptor.numberOfFrames;
+class AnimationGroup extends Updatable{
+	constructor(tiles, inAnimation = false, loop = false, direction = 1){
+		super();
+		this.tiles = tiles;
+		this.inAnimation = inAnimation;
+		this.loop = loop;
+		this.direction = direction;
 	}
 	
-	animate(){
-		if(this.descriptor.animated){
-			this.counter = (this.counter + 1) % FPS;
-			this.currentFrame = Math.floor(this.counter / this.framerate);
+	switchDirection(){
+		this.direction *= -1;
+	}
+	
+	stopAnimation(){
+		this.changeAnimation(false);
+	}
+	
+	startAnimation(){
+		this.changeAnimation(true);
+	}
+	
+	changeAnimation(animate){
+		this.inAnimation = animate;
+	}
+	
+	update(){
+			if(this.inAnimation){
+				let direction = this.direction;
+				this.tiles.forEach(function(tile){
+				tile.animate(direction);
+			});
 		}
+	}
+}
+
+class DockingDoorAnimation extends AnimationGroup{
+	constructor(tiles){
+		super(tiles);
+		this.initTiles(this.tiles);
+	}
+	
+	initTiles(){
+		this.tiles.forEach(function(tile){
+			tile.inAnimation = false;
+			tile.currentFrame = tile.descriptor.numberOfFrames - 1;
+			tile.counter = tile.descriptor.animationLength;
+		});
+	}
+	
+	open(){
+		this.switchDirection();
+		this.startAnimation();
+		new TimedEvent(FPS * 2 - 1, function(param){param.stopAnimation()}, this);
+	}
+	
+	close(){
+		this.switchDirection();
+		this.startAnimation();
+		new TimedEvent(FPS * 2 - 1, function(param){
+			param.stopAnimation();
+			param.initTiles();
+		}, this);
 	}
 }
 

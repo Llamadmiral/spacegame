@@ -14,6 +14,7 @@ let player = null;
 let stopRefresh = false;
 let mainTileMap = null;
 let camera = null;
+let observerList = null;
 
 
 function stopGame(){
@@ -33,6 +34,7 @@ function init(){
 	initCanvas();
 	initCamera();
 	initBackgroundAnimation();
+	initObserverList();
 	loadImages();
 	loadStructureTiles();
 	loadStructures();
@@ -66,7 +68,7 @@ function loadImages(){
 		let currentImage = IMAGES[i];
 		let img = new Image();
 		img.src = currentImage.src;
-		LOADED_IMAGES[currentImage.name] = new ImageDescriptor(currentImage.name, img, currentImage.anim, currentImage.numberOfFrames);
+		LOADED_IMAGES[currentImage.name] = new ImageDescriptor(currentImage.name, img, !!currentImage.anim, currentImage.numberOfFrames ? currentImage.numberOfFrames : 1, currentImage.animationLength ? currentImage.animationLength : FPS);
 	}
 }
 
@@ -104,6 +106,10 @@ function initCanvas(){
 
 function initCamera(){
 	camera = new Camera(0, 0);
+}
+
+function initObserverList(){
+	observerList = new ObserverList();
 }
 
 function refresh(){
