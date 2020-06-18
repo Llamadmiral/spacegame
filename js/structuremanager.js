@@ -200,9 +200,9 @@ class Ship extends Tilemap{
 			let matches = LOADED_STRUCTURE_MATRIXES["docking_door_vertical"].matches(matrixStructure);
 			if(matches){
 				foundDockingTile = true;
-				this.dockingTile = LOADED_STRUCTURE_TILES["docking_door_vertical"].build(possibleDockingTiles[i].x, possibleDockingTiles[i].y);
-				let dockingTopTile = LOADED_STRUCTURE_TILES["docking_door_vertical_top"].build(this.dockingTile.x, this.dockingTile.y - TILE_SIZE);
-				let dockingBottomTile = LOADED_STRUCTURE_TILES["docking_door_vertical_bottom"].build(this.dockingTile.x, this.dockingTile.y + TILE_SIZE);
+				this.dockingTile = LOADED_STRUCTURE_TILES["docking_door_vertical_left"].build(possibleDockingTiles[i].x, possibleDockingTiles[i].y);
+				let dockingTopTile = LOADED_STRUCTURE_TILES["docking_door_vertical_top_left"].build(this.dockingTile.x, this.dockingTile.y - TILE_SIZE);
+				let dockingBottomTile = LOADED_STRUCTURE_TILES["docking_door_vertical_bottom_left"].build(this.dockingTile.x, this.dockingTile.y + TILE_SIZE);
 				this.addTile(this.dockingTile);
 				this.addTile(dockingTopTile);
 				this.addTile(dockingBottomTile);
@@ -229,9 +229,18 @@ class PlayerTransporter extends Updatable{
 		this.x = this.otherShip.dockingTile.x - (TILE_SIZE * 15) - (TILE_SIZE * 6);
 		this.y = this.otherShip.dockingTile.y - (TILE_SIZE * 15);
 		this.ship = LOADED_STRUCTURES["player_ship"].build(this.x, this.y);
-		this.dockingTile = this.ship.getTile(this.x + TILE_SIZE * 6, this.y);
+		this.dockingTile = this.ship.getTile(this.x + TILE_SIZE * 6, this.y + TILE_SIZE);
 		player = new Player(this.x + 2 * TILE_SIZE, this.y, this.ship);
 		this.ship.showAllTiles();
+		this.initDockingDoorAnimationGroup();
+	}
+	
+	initDockingDoorAnimationGroup(){
+		let dockingTop = this.ship.getTile(this.dockingTile.x, this.dockingTile.y - TILE_SIZE);
+		let dockingBottom = this.ship.getTile(this.dockingTile.x, this.dockingTile.y + TILE_SIZE);
+		let dockingAnimationGroup = new DockingDoorAnimation([dockingTop, this.dockingTile, dockingBottom]);
+		new Observer(this.dockingTile, dockingAnimationGroup, "onDoorEnter", dockingAnimationGroup.open);
+		new Observer(this.dockingTile, dockingAnimationGroup, "onDoorLeave", dockingAnimationGroup.close);
 	}
 	
 	update(){
@@ -257,9 +266,15 @@ class PlayerTransporter extends Updatable{
 			for(let i = 1; i < 6; i++){
 				new TimedEvent((FPS * (i + 1)) / 2, 
 				function(params){
-					let newTile = new Floor(params[1].x + TILE_SIZE * params[2], params[1].y);
-					newTile.discovered = true;
-					params[0].addTile(newTile);
+					let bridgeTop = LOADED_STRUCTURE_TILES["ship_bridge_top_c"].build(params[1].x + TILE_SIZE * params[2], params[1].y - TILE_SIZE, "TILE_Floor_Bridge_C");
+					let bridgeFloor = LOADED_STRUCTURE_TILES["ship_bridge_floor_c"].build(params[1].x + TILE_SIZE * params[2], params[1].y, "TILE_Floor_Bridge_C");
+					let bridgeBottom = LOADED_STRUCTURE_TILES["ship_bridge_bottom_c"].build(params[1].x + TILE_SIZE * params[2], params[1].y + TILE_SIZE, "TILE_Floor_Bridge_C");
+					bridgeFloor.discovered = true;
+					bridgeTop.discovered = true;
+					bridgeBottom.discovered = true;
+					params[0].addTile(bridgeTop);
+					params[0].addTile(bridgeFloor);
+					params[0].addTile(bridgeBottom);
 				},
 				[this.ship, this.dockingTile, i]);
 			}

@@ -277,8 +277,8 @@ class Wall extends Tile{
 }
 
 class Floor extends Tile{
-	constructor(x, y){
-		super(x, y, "tile", true, true);
+	constructor(x, y, img = "tile"){
+		super(x, y, img, true, true);
 	}
 }
 
