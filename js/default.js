@@ -3,6 +3,7 @@ const FRAMERATE = 1000 / FPS;
 const UPDATABLE_OBJECTS = [];
 const BACKGROUND_COLOR = 'black';
 const TILE_SIZE = 32;
+const WALK_SPEED = 2;
 let DEBUG_MODE = false;
 
 let canvas = null;

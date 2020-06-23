@@ -141,15 +141,22 @@ class Moveable extends Drawable{
 		this.pathEffect = new PathEffect(this);
 		this.canMove = true;
 		this.stepCooldown = 0;
+		this.walkAnimationOffset = [0,0];
+		this.walkAnimationLength = 0;
 	}
 	
 	update(){
-		this.stepCooldown = this.stepCooldown === 0 ? 0 : this.stepCooldown - 1;
-		super.update();
-		if(this.stepCooldown === 0){
+		this.stepCooldown = this.stepCooldown <= 0 ? 0 : this.stepCooldown - 1;
+		if(this.stepCooldown <= 0){
 			this.move();
-			this.stepCooldown = 10;
+			this.stepCooldown = TILE_SIZE / WALK_SPEED;
 		}
+		if(this.walkAnimationLength > 0){
+			this.x += this.walkAnimationOffset[0] * WALK_SPEED;
+			this.y += this.walkAnimationOffset[1] * WALK_SPEED;
+			this.walkAnimationLength--;
+		}
+		super.update();
 	}
 	
 	prepareMove(x, y){
@@ -179,9 +186,9 @@ class Moveable extends Drawable{
 					if(this.canMove){
 						this.currentTile.onLeave(this);
 						tile.onStep(this);
+						this.walkAnimationLength = TILE_SIZE / WALK_SPEED;
+						this.walkAnimationOffset = [(tile.x - this.currentTile.x) / TILE_SIZE, (tile.y - this.currentTile.y) / TILE_SIZE];
 						this.currentTile = tile;
-						this.x = newX;
-						this.y = newY;
 						this.movement.step();
 					}
 				}
