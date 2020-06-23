@@ -140,12 +140,15 @@ class Moveable extends Drawable{
 		this.currentTile = this.tilemap.getTile(x, y);
 		this.pathEffect = new PathEffect(this);
 		this.canMove = true;
+		this.stepCooldown = 0;
 	}
 	
 	update(){
+		this.stepCooldown = this.stepCooldown === 0 ? 0 : this.stepCooldown - 1;
 		super.update();
-		if(currentFrame % 10 === 0){
+		if(this.stepCooldown === 0){
 			this.move();
+			this.stepCooldown = 10;
 		}
 	}
 	
@@ -191,10 +194,6 @@ class Player extends Moveable{
 	constructor(x, y, tilemap){
 		super(x, y, tilemap, "player", 10);
 		this.playerLighting = new PlayerLighting(this);
-	}
-	
-	update(){
-		super.update();
 	}
 }
 

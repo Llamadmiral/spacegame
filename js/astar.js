@@ -100,7 +100,6 @@ class RouteCreator{
             coordinates.push([currentNode.x, currentNode.y]);
             currentNode = currentNode.parent;
         }
-		coordinates.push([this.start.x, this.start.y]);
         return coordinates;
     }
     
