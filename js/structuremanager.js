@@ -15,7 +15,7 @@ const TILEMAP_ARRAY = [];
 
 function generateShip(){
 	let ship = new Ship();
-	let numberOfRooms = rnd(10, 12);
+	let numberOfRooms = rnd(4, 8);
 	let rooms = [];
 	
 	for(let i = 0; i < numberOfRooms; i++){
@@ -71,7 +71,7 @@ function addWalls(ship){
 		if(structure){
 			walls.addTileDescriptor(surroundingTiles[i][0], surroundingTiles[i][1], structure);
 		} else {
-			//console.log('Could not find matrix structure for matrix: ' + matrixStructure);
+			console.log('Could not find matrix structure for matrix: ' + matrixStructure);
 		}
 	}
 	ship.mergeDescriptors(walls);
@@ -244,15 +244,15 @@ class PlayerTransporter extends Updatable{
 	}
 	
 	update(){
-		let moveSpeed = 1;
+		let quickMode = true;
 		if(!this.arrived){
 			let offsetX = 0;
 			let offsetY = 0;
 			if(this.dockingTile.x !== this.otherShip.dockingTile.x - (6 * TILE_SIZE)){
-				offsetX = 1;
+				offsetX = quickMode ? TILE_SIZE : 1;
 			}
 			if(this.dockingTile.y !== this.otherShip.dockingTile.y){
-				offsetY = 1;
+				offsetY = quickMode ? TILE_SIZE : 1;
 			}
 			this.ship.move(offsetX, offsetY);
 			player.x += offsetX;
@@ -264,7 +264,8 @@ class PlayerTransporter extends Updatable{
 			this.ship.reassignKeys();
 			this.startedDocking = true;
 			for(let i = 1; i < 6; i++){
-				new TimedEvent((FPS * (i + 1)) / 2, 
+				let timeout = quickMode ? i : (FPS * (i + 1)) / 2;
+				new TimedEvent(timeout, 
 				function(params){
 					let bridgeTop = LOADED_STRUCTURE_TILES["ship_bridge_top_c"].build(params[1].x + TILE_SIZE * params[2], params[1].y - TILE_SIZE, "TILE_Floor_Bridge_C");
 					let bridgeFloor = LOADED_STRUCTURE_TILES["ship_bridge_floor_c"].build(params[1].x + TILE_SIZE * params[2], params[1].y, "TILE_Floor_Bridge_C");
@@ -278,7 +279,7 @@ class PlayerTransporter extends Updatable{
 				},
 				[this.ship, this.dockingTile, i]);
 			}
-			new TimedEvent(FPS * 3, 
+			new TimedEvent(quickMode ? 10 : FPS * 3, 
 				function(param){
 					param.ship.mergeMap(param.otherShip)
 				}, 

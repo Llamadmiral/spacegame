@@ -57,10 +57,14 @@ function addEventListeners(){
 function mouseClick(evt){
 	let x = normalizeToGrid(evt.clientX + camera.x);
 	let y = normalizeToGrid(evt.clientY + camera.y);
-	if(!evt.ctrlKey){
-		player.prepareMove(x, y);
-	} else {
+	if(evt.ctrlKey){
 		console.log(player.tilemap.getTile(x, y));
+	} else if(evt.shiftKey){
+		let newTile = LOADED_STRUCTURE_TILES["tile_debug"].build(x, y);
+		player.tilemap.addTile(newTile);
+		newTile.discovered = true;
+	} else {
+		player.prepareMove(x, y);
 	}
 }
 

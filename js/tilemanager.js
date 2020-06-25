@@ -83,6 +83,7 @@ class Tilemap {
 		}
 		if(this.map[tile.x][tile.y]){
 			let oldTile = this.map[tile.x][tile.y];
+			oldTile.destroy();
 			this.tileArray.splice(this.tileArray.indexOf(oldTile), 1);
 		}
 		this.map[tile.x][tile.y] = tile;
