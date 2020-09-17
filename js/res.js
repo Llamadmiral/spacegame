@@ -42,57 +42,59 @@ const IMAGES = [
 	{"name": "ship_inner_wing_left", "src":"img/ship/ship_inner_wing_left.png","anim":false},
 	{"name": "ship_middle_wing_left", "src":"img/ship/ship_middle_wing_left.png","anim":true, "numberOfFrames":4},
 	{"name": "ship_middle_wing_right", "src":"img/ship/ship_middle_wing_right.png","anim":true, "numberOfFrames":4},
-	
-	
+
+
 	{"name": "TILE_Door_Floor_A_Animation_55F", "src":"img/doors/TILE_Door_Floor_A_Animation_55F.png","anim":true, "numberOfFrames":55, "animationLength" : FPS * 2},
 	{"name": "TILE_Door_Left_Down_Animation_55F", "src":"img/doors/TILE_Door_Left_Down_Animation_55F.png","anim":true, "numberOfFrames":55, "animationLength" : FPS * 2},
 	{"name": "TILE_Door_Left_Up_Animation_55F", "src":"img/doors/TILE_Door_Left_Up_Animation_55F.png","anim":true, "numberOfFrames":55, "animationLength" : FPS * 2},
-	
+
 	{"name": "TILE_Door_Floor_A_Animation_55F", "src":"img/doors/TILE_Door_Floor_A_Animation_55F.png","anim":true, "numberOfFrames":55, "animationLength" : FPS * 2},
 	{"name": "TILE_Door_Right_Down_Animation_55F", "src":"img/doors/TILE_Door_Right_Down_Animation_55F.png","anim":true, "numberOfFrames":55, "animationLength" : FPS * 2},
 	{"name": "TILE_Door_Right_Up_Animation_55F", "src":"img/doors/TILE_Door_Right_Up_Animation_55F.png","anim":true, "numberOfFrames":55, "animationLength" : FPS * 2},
-	
+
 	{"name": "TILE_Wall_Bottom_EE", "src":"img/ship/TILE_Wall_Bottom_EE.png", "anim":false},
 	{"name": "TILE_Wall_Bottom_WE", "src":"img/ship/TILE_Wall_Bottom_WE.png", "anim":false},
 	{"name": "TILE_Wall_Bottom_Window_WW", "src":"img/ship/TILE_Wall_Bottom_Window_WW.png", "anim":false},
-	
+
 	{"name": "TILE_Wall_Outer_Bottom_Left", "src":"img/ship/TILE_Wall_Outer_Bottom_Left.png", "anim": false},
 	{"name": "TILE_Wall_Bottom_LeftBent_EE", "src":"img/ship/TILE_Wall_Bottom_LeftBent_EE.png", "anim": false},
-	
+
 	{"name": "TILE_Wall_Outer_Bottom_Right", "src":"img/ship/TILE_Wall_Outer_Bottom_Right.png", "anim": false},
 	{"name": "TILE_Wall_Bottom_RightBent_EE", "src":"img/ship/TILE_Wall_Bottom_RightBent_EE.png", "anim": false},
 	{"name": "TILE_Wall_Inner_Bottom_Right", "src":"img/ship/TILE_Wall_Inner_Bottom_Right.png", "anim": false},
 	{"name": "TILE_Wall_Inner_Bottom_Left", "src":"img/ship/TILE_Wall_Inner_Bottom_Left.png", "anim": false},
-	
+
 	{"name": "TILE_Wall_Outer_Top_Left", "src":"img/ship/TILE_Wall_Outer_Top_Left.png", "anim": false},
 	{"name": "TILE_Wall_Top_LeftBent_EW", "src":"img/ship/TILE_Wall_Top_LeftBent_EW.png", "anim": false},
 	{"name": "TILE_Wall_Top_LeftBent_WE", "src":"img/ship/TILE_Wall_Top_LeftBent_WE.png", "anim": false},
 	{"name": "TILE_Wall_Inner_Top_Left", "src":"img/ship/TILE_Wall_Inner_Top_Left.png", "anim": false},
-	
+
 	{"name": "TILE_Wall_Inner_Top_Right", "src":"img/ship/TILE_Wall_Inner_Top_Right.png", "anim": false},
 	{"name": "TILE_Wall_Outer_Top_Right", "src":"img/ship/TILE_Wall_Outer_Top_Right.png", "anim": false},
 	{"name": "TILE_Wall_Top_RightBent_EE", "src":"img/ship/TILE_Wall_Top_RightBent_EE.png", "anim": false},
 	{"name": "TILE_Wall_Top_RightBent_WW", "src":"img/ship/TILE_Wall_Top_RightBent_WW.png", "anim": false},
-	
-	
+
+
 	{"name": "TILE_Wall_Top_EE", "src":"img/ship/TILE_Wall_Top_EE.png", "anim": false},
 	{"name": "TILE_Wall_Top_WE", "src":"img/ship/TILE_Wall_Top_WE.png", "anim": false},
 	{"name": "TILE_Wall_Top_WW", "src":"img/ship/TILE_Wall_Top_WW.png", "anim": false},
-	
-	
+
+
 	{"name": "TILE_Wall_Left", "src":"img/ship/TILE_Wall_Left.png", "anim": false},
 	{"name": "TILE_Wall_Right", "src":"img/ship/TILE_Wall_Right.png", "anim": false},
 	{"name": "TILE_Wall_Right_Pipes", "src":"img/ship/TILE_Wall_Right_Pipes.png", "anim": false},
-	
+
 	{"name": "TILE_Floor_Bridge_C", "src":"img/ship/floor/TILE_FLOOR_Bridge_C.png", "anim":false},
 	{"name": "TILE_Wall_Bridge_Top_C", "src":"img/ship/TILE_Wall_Bridge_Top_C.png", "anim":false},
 	{"name": "TILE_Wall_Bridge_Bottom_C", "src":"img/ship/TILE_Wall_Bridge_Bottom_C.png", "anim":false},
-	
+
 	{"name": "TILE_Wall_Start_WW", "src":"img/ship/TILE_Wall_Start_WW.png", "anim":false},
 	{"name": "TILE_Wall_Pipes_WW", "src":"img/ship/TILE_Wall_Pipes_WW.png", "anim":false},
 	{"name": "TILE_Wall_Top_Shifted_X_WW", "src":"img/ship/TILE_Wall_Top_Shifted_X_WW.png", "anim":false},
 	{"name": "TILE_Wall_WW", "src":"img/ship/TILE_Wall_WW.png", "anim":false},
 	{"name": "TILE_Wall_End_WW", "src":"img/ship/TILE_Wall_End_WW.png", "anim":false},
+
+	{"name":"monster_blob", "src":"img/monster/monster_blob.png", "anim":false},
 ];
 
 const STRUCTURES = [
