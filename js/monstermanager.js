@@ -16,8 +16,7 @@ class MonsterManager {
 
 class Monster extends Moveable {
     constructor(manager, tile, img) {
-        super(tile.x, tile.y, manager.tileset, img, 9);
-        this.currentTile.walkable = false;
+        super(tile.x, tile.y, manager.tileset, img, 11);
         this.manager = manager;
         new Observer(player, this, "playerStep", this.checkPlayerProximity);
     }
@@ -31,7 +30,7 @@ class Monster extends Moveable {
             let ray = new Ray(this.currentTile, angle, this.manager.tileset);
             ray.cast();
             if (ray.traveledTiles.indexOf(player.currentTile) !== -1) {
-                this.startMovementToPlayer();
+               this.startMovementToPlayer();
             }
         }
     }

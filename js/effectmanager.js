@@ -5,7 +5,7 @@ class PathEffect extends Updatable {
     constructor(moveable) {
         super(11);
         this.moveable = moveable;
-        this.dot = null;
+        this.dot = undefined;
     }
 
     draw() {
