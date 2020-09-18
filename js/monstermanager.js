@@ -31,7 +31,6 @@ class Monster extends Moveable {
             let ray = new Ray(this.currentTile, angle, this.manager.tileset);
             ray.cast();
             if (ray.traveledTiles.indexOf(player.currentTile) !== -1) {
-                console.log("Can see the player!");
                 this.startMovementToPlayer();
             }
         }
@@ -50,7 +49,6 @@ class Monster extends Moveable {
                 }
             }
         }
-        console.log(closestTile);
         this.prepareMove(closestTile.x, closestTile.y);
     }
 

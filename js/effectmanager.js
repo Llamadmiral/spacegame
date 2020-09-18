@@ -5,7 +5,7 @@ class PathEffect extends Updatable {
     constructor(moveable) {
         super(11);
         this.moveable = moveable;
-        let dot = undefined;
+        this.dot = null;
     }
 
     draw() {
@@ -201,12 +201,11 @@ function normalizeToGrid(number) {
 }
 
 function initBackgroundAnimation() {
-    let timedEvent = new TimedEvent(rnd(10, 20), initBackgroundAnimation);
+    new TimedEvent(rnd(10, 20), initBackgroundAnimation);
     spawnStars();
 }
 
 function spawnStars() {
-    let numberOfStars = 1;
     let spawnX = canvas.width;
     let spawnY = rnd(10, canvas.height);
     new Star(spawnX, spawnY, rnd(1, 4));
