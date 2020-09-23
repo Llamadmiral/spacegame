@@ -230,7 +230,8 @@ class PlayerTransporter extends Updatable {
         this.y = this.otherShip.dockingTile.y - (TILE_SIZE * 15);
         this.ship = LOADED_STRUCTURES["player_ship"].build(this.x, this.y);
         this.dockingTile = this.ship.getTile(this.x + TILE_SIZE * 6, this.y + TILE_SIZE);
-        player = new Player(this.x + 2 * TILE_SIZE, this.y, this.ship);
+        GameManager.player = new Player(this.x + 2 * TILE_SIZE, this.y, this.ship);
+        GameManager.cameraTarget = GameManager.player;
         let monsterManager = new MonsterManager(1, this.otherShip);
         monsterManager.spawnMonsters();
         this.ship.showAllTiles();
@@ -257,8 +258,8 @@ class PlayerTransporter extends Updatable {
                 offsetY = quickMode ? TILE_SIZE : 1;
             }
             this.ship.move(offsetX, offsetY);
-            player.x += offsetX;
-            player.y += offsetY;
+            GameManager.player.x += offsetX;
+            GameManager.player.y += offsetY;
             if (this.dockingTile.y === this.otherShip.dockingTile.y && this.dockingTile.x === this.otherShip.dockingTile.x - (6 * TILE_SIZE)) {
                 this.arrived = true;
             }

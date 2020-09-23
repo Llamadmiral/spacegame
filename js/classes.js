@@ -139,7 +139,7 @@ class DockingDoorAnimation extends AnimationGroup {
 class Moveable extends Drawable {
     constructor(x, y, tilemap, src, z) {
         super(x, y, src, z);
-        this.movement = new Movement();
+        this.path = [];
         this.tilemap = tilemap;
         this.currentTile = this.tilemap.getTile(x, y);
         this.pathEffect = new PathEffect(this);
@@ -172,7 +172,7 @@ class Moveable extends Drawable {
             if (this.tilemap.tileArray.indexOf(endTile) !== -1) {
                 let routeCreator = new RouteCreator(this.tilemap.tileArray, this.currentTile, endTile);
                 let route = routeCreator.createRoute();
-                this.movement.path = flattenRoute(route, this.tilemap);
+                this.path = flattenRoute(route, this.tilemap);
             } else {
                 console.log('Unreachable tile!', endTile);
             }
@@ -181,7 +181,7 @@ class Moveable extends Drawable {
 
     move() {
         if (this.canMove) {
-            let nextStep = this.movement.getNextStep();
+            let nextStep = this.path.length > 0 ? this.path[0] : false;
             if (nextStep) {
                 let newX = nextStep[0];
                 let newY = nextStep[1];
@@ -194,7 +194,7 @@ class Moveable extends Drawable {
                         this.walkAnimationLength = TILE_SIZE / WALK_SPEED;
                         this.walkAnimationOffset = [(tile.x - this.currentTile.x) / TILE_SIZE, (tile.y - this.currentTile.y) / TILE_SIZE];
                         this.currentTile = tile;
-                        this.movement.step();
+                        this.path.splice(0, 1);
                         if (this.stepTrigger) {
                             this.stepTrigger.trigger();
                         }
@@ -210,24 +210,6 @@ class Player extends Moveable {
         super(x, y, tilemap, "player", 10);
         this.playerLighting = new PlayerLighting(this);
         super.stepTrigger = new Trigger(this, "playerStep");
-    }
-}
-
-class Movement {
-    constructor() {
-        this.path = [];
-    }
-
-    getNextStep() {
-        let nextStep = false;
-        if (this.path.length > 0) {
-            nextStep = this.path[0];
-        }
-        return nextStep;
-    }
-
-    step() {
-        this.path.splice(0, 1);
     }
 }
 

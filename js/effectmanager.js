@@ -9,14 +9,14 @@ class PathEffect extends Updatable {
     }
 
     draw() {
-        if (this.moveable.movement.path.length > 0) {
+        if (this.moveable.path.length > 0) {
             context.strokeStyle = 'cyan';
             context.beginPath();
             let x = this.moveable.x - camera.x;
             let y = this.moveable.y - camera.y;
             context.moveTo(x + HALF_TILE, y + HALF_TILE);
-            for (let i = 0; i < this.moveable.movement.path.length; i++) {
-                let step = this.moveable.movement.path[i];
+            for (let i = 0; i < this.moveable.path.length; i++) {
+                let step = this.moveable.path[i];
                 x = step[0] - camera.x;
                 y = step[1] - camera.y;
                 context.lineTo(x + HALF_TILE, y + HALF_TILE);
