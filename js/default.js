@@ -14,6 +14,9 @@ let currentFrame = 0;
 let stopRefresh = false;
 let camera = null;
 let observerList = null;
+let loadedImages = 0;
+
+let imageDirection = ['right', 'bottom', 'left', 'top'];
 
 
 function stopGame() {
@@ -35,10 +38,18 @@ function init() {
     initBackgroundAnimation();
     initObserverList();
     loadImages();
+}
+
+function initUI() {
+    GameManager.combatOrderIndicator = new UiCombatOrderIndicator(0, 0, 100);
+}
+
+function imagesLoaded() {
     loadStructureTiles();
     loadStructures();
     loadStructureMatrixes();
     addEventListeners();
+    initUI();
     spawnPlayerTransporter();
     nextCounterClearTime = Date.now() + 1000;
     refresh();
@@ -64,7 +75,8 @@ function mouseClick(evt) {
             GameManager.player.y = y;
             GameManager.player.currentTile = tile;
         }
-        /*let newTile = LOADED_STRUCTURE_TILES["tile_debug"].build(x, y);
+        //tile.switchImageTo("hologram_border_right_mirrored");
+        /*let newTile = LOADED_STRUCTURE_TILES["hologram_border"].build(x, y);
         GameManager.player.tilemap.addTile(newTile);
         newTile.discovered = true;*/
     } else {
@@ -75,10 +87,57 @@ function mouseClick(evt) {
 function loadImages() {
     for (let i = 0; i < IMAGES.length; i++) {
         let currentImage = IMAGES[i];
-        let img = new Image();
-        img.src = currentImage.src;
-        LOADED_IMAGES[currentImage.name] = new ImageDescriptor(currentImage.name, img, !!currentImage.anim, currentImage.numberOfFrames ? currentImage.numberOfFrames : 1, currentImage.animationLength ? currentImage.animationLength : FPS);
+        loadImage(currentImage);
     }
+}
+
+function loadImage(res) {
+    let loadedImage = new Image();
+    loadedImage.onload = function () {
+        if (res.createRotaiton) {
+            for (let i = 0; i < 4; i++) {
+                let name = res.name + '_' + imageDirection[i];
+                let rotatedImage = rotateImage(loadedImage, i * 90);
+                let mirroredImage = mirrorImage(rotatedImage);
+                LOADED_IMAGES[name] = new ImageDescriptor(name, rotatedImage, !!res.anim, res.numberOfFrames ? res.numberOfFrames : 1, res.animationLength ? res.animationLength : FPS)
+                LOADED_IMAGES[name + '_mirrored'] = new ImageDescriptor(name + '_mirrored', mirroredImage, !!res.anim, res.numberOfFrames ? res.numberOfFrames : 1, res.animationLength ? res.animationLength : FPS)
+            }
+        } else {
+            LOADED_IMAGES[res.name] = new ImageDescriptor(res.name, loadedImage, !!res.anim, res.numberOfFrames ? res.numberOfFrames : 1, res.animationLength ? res.animationLength : FPS);
+        }
+        loadedImage.onload = null;
+        loadedImages++;
+        if (loadedImages === IMAGES.length) {
+            console.log("All images loaded");
+            imagesLoaded();
+        }
+    };
+    loadedImage.src = res.src;
+}
+
+function mirrorImage(img) {
+    let c = document.createElement("canvas");
+    c.width = img.width;
+    c.height = img.height;
+    let ctx = c.getContext("2d");
+    ctx.scale(-1, 1);
+    ctx.drawImage(img, 0, 0, img.width * -1, img.height);
+    let newImg = new Image(img.width, img.height);
+    newImg.src = ctx.canvas.toDataURL("image/png");
+    return newImg;
+}
+
+function rotateImage(img, angle) {
+    let c = document.createElement("canvas");
+    c.width = img.width;
+    c.height = img.height;
+    let ctx = c.getContext("2d");
+    ctx.translate(img.width / 2, img.height / 2);
+    ctx.rotate(angle * Math.PI / 180);
+    ctx.drawImage(img, -img.width / 2, -img.height / 2);
+    let newImg = new Image(img.width, img.height);
+    newImg.src = ctx.canvas.toDataURL("image/png");
+    return newImg;
 }
 
 function loadStructureTiles() {

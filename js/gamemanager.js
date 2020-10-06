@@ -7,6 +7,7 @@ class GameManager {
 
         this.player = null;
         this.cameraTarget = null;
+        this.combatOrderIndicator = null;
 
         return this;
     }

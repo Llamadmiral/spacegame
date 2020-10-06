@@ -184,7 +184,7 @@ class Dot extends Updatable {
 
 class Star extends Dot {
     constructor(x, y, r) {
-        super(x, y, r, 'white');
+        super(x, y, r, 'white', 1);
         this.v = r + rnd(0, 2);
     }
 
