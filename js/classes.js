@@ -148,6 +148,8 @@ class Moveable extends Drawable {
         this.walkAnimationOffset = [0, 0];
         this.walkAnimationLength = 0;
         this.stepTrigger = undefined;
+        this.lastStepTrigger = false;
+        this.lastStepFunction = null;
     }
 
     update() {
@@ -160,6 +162,10 @@ class Moveable extends Drawable {
             this.x += this.walkAnimationOffset[0] * WALK_SPEED;
             this.y += this.walkAnimationOffset[1] * WALK_SPEED;
             this.walkAnimationLength--;
+        }
+        if (this.lastStepFunction && this.lastStepTrigger && this.walkAnimationLength === 0 && this.path.length === 0) {
+            this.lastStepFunction();
+            this.lastStepTrigger = false;
         }
         super.update();
     }
@@ -208,9 +214,25 @@ class Moveable extends Drawable {
 class Player extends Moveable {
     constructor(x, y, tilemap) {
         super(x, y, tilemap, "player", 10);
-        this.playerLighting = new PlayerLighting(this);
         super.stepTrigger = new Trigger(this, "playerStep");
+        this.playerLighting = new PlayerLighting(this);
+        this.isInBattle = false;
     }
+
+    battleLogic() {
+        this.canMove = true;
+        this.lastStepFunction = function () {
+            GameManager.battle.next();
+        };
+    }
+
+    prepareMove(x, y) {
+        if (this.isInBattle) {
+            this.lastStepTrigger = true;
+        }
+        super.prepareMove(x, y);
+    }
+
 }
 
 class TimedEvent extends Updatable {

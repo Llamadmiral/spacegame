@@ -32,7 +32,13 @@ class Monster extends Moveable {
                 let ray = new Ray(this.currentTile, angle, this.manager.tileset);
                 ray.cast();
                 if (ray.traveledTiles.indexOf(GameManager.player.currentTile) !== -1) {
-                    this.startMovementToPlayer();
+                    GameManager.player.path = [];
+                    GameManager.player.canMove = false;
+                    GameManager.player.isInBattle = true;
+                    GameManager.battle = new Battle();
+                    GameManager.battle.participants.push(new BattleParticipant(this, this.startMovementToPlayer, 10));
+                    GameManager.battle.participants.push(new BattleParticipant(GameManager.player, GameManager.player.battleLogic, 5));
+                    GameManager.battle.start();
                     this.seenPlayer = true;
                 }
             }
@@ -54,17 +60,13 @@ class Monster extends Moveable {
                 }
             }
         }
-        GameManager.player.path = [];
-        GameManager.cameraTarget = this;
-        GameManager.player.canMove = false;
         new TimedEvent(FPS / 2, function (params) {
             params[0].prepareMove(params[1], params[2]);
+            params[0].lastStepTrigger = true;
+            params[0].lastStepFunction = function () {
+                GameManager.battle.next();
+            };
         }, [this, closestTile.x, closestTile.y]);
-        new TimedEvent((FPS / 2) + 15 + (Math.ceil(minDist / TILE_SIZE)) * TILE_SIZE,
-            function () {
-                GameManager.cameraTarget = GameManager.player;
-                GameManager.player.canMove = true;
-            });
     }
 
 }

@@ -21,6 +21,7 @@ class UiCombatOrderIndicator extends UiElement {
         this.direction = 0;
         this.steps = 0;
         this.targetWidth = 0;
+        this.battle = null;
     }
 
     draw() {
@@ -32,6 +33,15 @@ class UiCombatOrderIndicator extends UiElement {
         context.drawImage(this.borderLeftPillar.img, middle - (diff), 0);
         context.drawImage(this.borderRightPillar.img, middle + (diff), 0);
         context.drawImage(this.borderRight.img, middle + (diff), TILE_SIZE);
+        if (this.battle) {
+            let fullLength = this.battle.participants.length * TILE_SIZE;
+            for (let i = 0; i < this.battle.participants.length; i++) {
+                let participant = this.battle.participants[i].participant;
+                let img = participant.descriptor.img;
+                let startX = middle + i * TILE_SIZE + (HALF_TILE) - (fullLength / 2);
+                context.drawImage(img, startX, HALF_TILE);
+            }
+        }
     }
 
     update() {
@@ -55,4 +65,12 @@ class UiCombatOrderIndicator extends UiElement {
         this.steps = Math.abs(Math.ceil((this.width - newSize) / this.direction));
         this.targetWidth = newSize;
     }
+
+    init(battle) {
+        this.battle = battle;
+        let newSize = (1 + battle.participants.length) * TILE_SIZE;
+        this.open(newSize);
+    }
+
+
 }
