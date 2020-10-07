@@ -232,7 +232,7 @@ class PlayerTransporter extends Updatable {
         this.dockingTile = this.ship.getTile(this.x + TILE_SIZE * 6, this.y + TILE_SIZE);
         GameManager.player = new Player(this.x + 2 * TILE_SIZE, this.y, this.ship);
         GameManager.cameraTarget = GameManager.player;
-        let monsterManager = new MonsterManager(1, this.otherShip);
+        let monsterManager = new MonsterManager(3, this.otherShip);
         monsterManager.spawnMonsters();
         this.ship.showAllTiles();
         this.initDockingDoorAnimationGroup();

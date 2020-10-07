@@ -45,8 +45,12 @@ class MonsterManager {
                 let participant = participants[i];
                 for (let j = 0; j < this.monsters.length; j++) {
                     let monster = this.monsters[j];
-                    if (participant !== monster && participants.indexOf(monster) === -1 && canAseeB(participant, monster, 6)) {
-                        participants.push(monster);
+                    if (participant !== monster && participants.indexOf(monster) === -1) {
+                        let canSee = canAseeB(participant, monster, 6);
+                        console.log(participant, monster, canSee);
+                        if (canSee) {
+                            participants.push(monster);
+                        }
                     }
                 }
             }
@@ -64,7 +68,7 @@ function canAseeB(a, b, range) {
         let angle = -Math.atan2(deltaY, deltaX);
         let ray = new Ray(a.currentTile, angle, a.manager.tileset);
         ray.cast();
-        if (ray.traveledTiles.indexOf(GameManager.player.currentTile) !== -1) {
+        if (ray.traveledTiles.indexOf(b.currentTile) !== -1) {
             canSee = true;
         }
     }
@@ -106,6 +110,9 @@ class Monster extends Moveable {
         }
         new TimedEvent(FPS / 2, function (params) {
             params[0].prepareMove(params[1], params[2]);
+            if (params[0].path.length > params[0].movespeed) {
+                params[0].path = params[0].path.slice(0, params[0].movespeed);
+            }
             params[0].lastStepTrigger = true;
             params[0].lastStepFunction = function () {
                 GameManager.battle.next();
@@ -117,6 +124,7 @@ class Monster extends Moveable {
 class Blob extends Monster {
     constructor(manager, tile) {
         super(manager, tile, "monster_blob");
+        this.movespeed = 2;
     }
 
     getBattleLogic() {
