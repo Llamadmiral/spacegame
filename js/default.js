@@ -16,6 +16,10 @@ let camera = null;
 let observerList = null;
 let loadedImages = 0;
 
+let lastMouseoverX = 0;
+let lastMouseoverY = 0;
+let objToUnselect = null;
+
 let imageDirection = ['right', 'bottom', 'left', 'top'];
 
 
@@ -61,6 +65,30 @@ function spawnPlayerTransporter() {
 
 function addEventListeners() {
     canvas.addEventListener('click', mouseClick);
+    canvas.addEventListener('mousemove', mousemove);
+}
+
+function mousemove(evt) {
+    let x = normalizeToGrid(evt.clientX + camera.x);
+    let y = normalizeToGrid(evt.clientY + camera.y);
+    if (lastMouseoverX !== x || lastMouseoverY !== y) {
+        if (objToUnselect) {
+            objToUnselect.unselect();
+            objToUnselect = null;
+        }
+        lastMouseoverX = x;
+        lastMouseoverY = y;
+        for (let i = UPDATABLE_OBJECTS.length - 1; i >= 0; i--) {
+            let obj = UPDATABLE_OBJECTS[i];
+            if (obj.x && obj.y && obj.x === x && obj.y === y) {
+                if (obj.select) {
+                    obj.select();
+                    objToUnselect = obj;
+                }
+                break;
+            }
+        }
+    }
 }
 
 function mouseClick(evt) {
@@ -82,62 +110,6 @@ function mouseClick(evt) {
     } else {
         GameManager.player.prepareMove(x, y);
     }
-}
-
-function loadImages() {
-    for (let i = 0; i < IMAGES.length; i++) {
-        let currentImage = IMAGES[i];
-        loadImage(currentImage);
-    }
-}
-
-function loadImage(res) {
-    let loadedImage = new Image();
-    loadedImage.onload = function () {
-        if (res.createRotaiton) {
-            for (let i = 0; i < 4; i++) {
-                let name = res.name + '_' + imageDirection[i];
-                let rotatedImage = rotateImage(loadedImage, i * 90);
-                let mirroredImage = mirrorImage(rotatedImage);
-                LOADED_IMAGES[name] = new ImageDescriptor(name, rotatedImage, !!res.anim, res.numberOfFrames ? res.numberOfFrames : 1, res.animationLength ? res.animationLength : FPS)
-                LOADED_IMAGES[name + '_mirrored'] = new ImageDescriptor(name + '_mirrored', mirroredImage, !!res.anim, res.numberOfFrames ? res.numberOfFrames : 1, res.animationLength ? res.animationLength : FPS)
-            }
-        } else {
-            LOADED_IMAGES[res.name] = new ImageDescriptor(res.name, loadedImage, !!res.anim, res.numberOfFrames ? res.numberOfFrames : 1, res.animationLength ? res.animationLength : FPS);
-        }
-        loadedImage.onload = null;
-        loadedImages++;
-        if (loadedImages === IMAGES.length) {
-            console.log("All images loaded");
-            imagesLoaded();
-        }
-    };
-    loadedImage.src = res.src;
-}
-
-function mirrorImage(img) {
-    let c = document.createElement("canvas");
-    c.width = img.width;
-    c.height = img.height;
-    let ctx = c.getContext("2d");
-    ctx.scale(-1, 1);
-    ctx.drawImage(img, 0, 0, img.width * -1, img.height);
-    let newImg = new Image(img.width, img.height);
-    newImg.src = ctx.canvas.toDataURL("image/png");
-    return newImg;
-}
-
-function rotateImage(img, angle) {
-    let c = document.createElement("canvas");
-    c.width = img.width;
-    c.height = img.height;
-    let ctx = c.getContext("2d");
-    ctx.translate(img.width / 2, img.height / 2);
-    ctx.rotate(angle * Math.PI / 180);
-    ctx.drawImage(img, -img.width / 2, -img.height / 2);
-    let newImg = new Image(img.width, img.height);
-    newImg.src = ctx.canvas.toDataURL("image/png");
-    return newImg;
 }
 
 function loadStructureTiles() {

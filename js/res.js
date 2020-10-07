@@ -94,7 +94,7 @@ const IMAGES = [
 	{"name": "TILE_Wall_WW", "src":"img/ship/TILE_Wall_WW.png"},
 	{"name": "TILE_Wall_End_WW", "src":"img/ship/TILE_Wall_End_WW.png"},
 
-	{"name":"monster_blob", "src":"img/monster/monster_blob.png"},
+	{"name":"monster_blob", "src":"img/monster/monster_blob.png", "selectable" : true},
 
 	{"name":"hologram_border", "src":"img/ui/hologram_border.png", "createRotaiton": true},
 	{"name":"hologram_border_pillar", "src":"img/ui/hologram_border_pillar.png"},

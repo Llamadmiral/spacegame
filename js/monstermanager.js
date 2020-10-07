@@ -51,8 +51,7 @@ class MonsterManager {
                 for (let j = 0; j < this.monsters.length; j++) {
                     let monster = this.monsters[j];
                     if (participant !== monster && participants.indexOf(monster) === -1) {
-                        let canSee = canAseeB(participant, monster, 6);
-                        console.log(participant, monster, canSee);
+                        let canSee = canASeeB(participant, monster, 6);
                         if (canSee) {
                             participants.push(monster);
                         }
@@ -64,7 +63,7 @@ class MonsterManager {
     }
 }
 
-function canAseeB(a, b, range) {
+function canASeeB(a, b, range) {
     let canSee = false;
     let distance = manhattanDistance(a.currentTile.x, a.currentTile.y, b.currentTile.x, b.currentTile.y);
     if (distance <= range * TILE_SIZE) {
@@ -83,6 +82,7 @@ function canAseeB(a, b, range) {
 class Monster extends Moveable {
     constructor(manager, tile, img) {
         super(tile.x, tile.y, manager.tileset, img, 11);
+        this.technicalName = img;
         this.manager = manager;
         this.isInBattle = false;
         new Observer(GameManager.player, this, "playerStep", this.checkPlayerProximity);
@@ -90,7 +90,7 @@ class Monster extends Moveable {
 
     checkPlayerProximity() {
         if (!this.isInBattle) {
-            let canSee = canAseeB(this, GameManager.player, 6);
+            let canSee = canASeeB(this, GameManager.player, 6);
             if (canSee) {
                 this.manager.initiateBattle(this, true);
             }
@@ -123,6 +123,14 @@ class Monster extends Moveable {
                 GameManager.battle.next();
             };
         }, [this, closestTile.x, closestTile.y]);
+    }
+
+    select() {
+        this.switchImageTo(this.descriptor.name + '_selected');
+    }
+
+    unselect() {
+        this.switchImageTo(this.technicalName);
     }
 }
 
