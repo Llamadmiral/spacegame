@@ -29,7 +29,6 @@ class Battle {
     next() {
         console.log('called', this.participants[this.index]);
         GameManager.cameraTarget = this.participants[this.index].participant;
-        console.log(GameManager.cameraTarget);
         this.participants[this.index].performRound();
         this.index = (this.index + 1) % this.participants.length;
     }
