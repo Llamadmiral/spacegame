@@ -8,6 +8,7 @@ class GameManager {
         this.player = null;
         this.cameraTarget = null;
         this.combatOrderIndicator = null;
+        this.monsterManager = null;
         this.battle = null;
 
         return this;

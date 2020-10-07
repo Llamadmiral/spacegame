@@ -19,6 +19,7 @@ let loadedImages = 0;
 let lastMouseoverX = 0;
 let lastMouseoverY = 0;
 let objToUnselect = null;
+let runSelectLogic = false;
 
 let imageDirection = ['right', 'bottom', 'left', 'top'];
 
@@ -39,7 +40,6 @@ function $(id) {
 function init() {
     initCanvas();
     initCamera();
-    initBackgroundAnimation();
     initObserverList();
     loadImages();
 }
@@ -55,6 +55,7 @@ function imagesLoaded() {
     addEventListeners();
     initUI();
     spawnPlayerTransporter();
+    initBackgroundAnimation();
     nextCounterClearTime = Date.now() + 1000;
     refresh();
 }
@@ -69,26 +70,7 @@ function addEventListeners() {
 }
 
 function mousemove(evt) {
-    let x = normalizeToGrid(evt.clientX + camera.x);
-    let y = normalizeToGrid(evt.clientY + camera.y);
-    if (lastMouseoverX !== x || lastMouseoverY !== y) {
-        if (objToUnselect) {
-            objToUnselect.unselect();
-            objToUnselect = null;
-        }
-        lastMouseoverX = x;
-        lastMouseoverY = y;
-        for (let i = UPDATABLE_OBJECTS.length - 1; i >= 0; i--) {
-            let obj = UPDATABLE_OBJECTS[i];
-            if (obj.x && obj.y && obj.x === x && obj.y === y) {
-                if (obj.select) {
-                    obj.select();
-                    objToUnselect = obj;
-                }
-                break;
-            }
-        }
-    }
+    runSelectLogic = evt;
 }
 
 function mouseClick(evt) {
@@ -151,6 +133,30 @@ function initObserverList() {
     observerList = new ObserverList();
 }
 
+function selectLogic(evt) {
+    let x = normalizeToGrid(evt.clientX + camera.x);
+    let y = normalizeToGrid(evt.clientY + camera.y);
+    if (lastMouseoverX !== x || lastMouseoverY !== y) {
+        if (objToUnselect) {
+            objToUnselect.unselect();
+            objToUnselect = null;
+        }
+        lastMouseoverX = x;
+        lastMouseoverY = y;
+        for (let i = UPDATABLE_OBJECTS.length - 1; i >= 0; i--) {
+            let obj = UPDATABLE_OBJECTS[i];
+            if (obj.hasOwnProperty('x') && obj.hasOwnProperty('y') && obj.x === x && obj.y === y) {
+                console.log(obj);
+                if (obj.select) {
+                    obj.select();
+                    objToUnselect = obj;
+                }
+                break;
+            }
+        }
+    }
+}
+
 function refresh() {
     if (!stopRefresh) {
         let now = Date.now();
@@ -163,6 +169,10 @@ function refresh() {
         context.clearRect(0, 0, canvas.width, canvas.height);
         context.fillStyle = BACKGROUND_COLOR;
         context.fillRect(0, 0, canvas.width, canvas.height);
+        if (runSelectLogic) {
+            selectLogic(runSelectLogic);
+            runSelectLogic = false;
+        }
         for (let i = 0; i < UPDATABLE_OBJECTS.length; i++) {
             let object = UPDATABLE_OBJECTS[i];
             object.update();
