@@ -18,11 +18,21 @@ class Battle {
     constructor() {
         this.participants = [];
         this.index = 0;
+        this.started = false;
+    }
+
+    addParticipant(participant) {
+        this.participants.push(participant);
+        if (this.started) {
+            this.participants.sort(battleSpeedComparator);
+            GameManager.combatOrderIndicator.init(this);
+        }
     }
 
     start() {
         this.participants.sort(battleSpeedComparator);
         GameManager.combatOrderIndicator.init(this);
+        this.started = true;
         this.next();
     }
 

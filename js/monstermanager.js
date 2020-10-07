@@ -20,20 +20,25 @@ class MonsterManager {
     }
 
     initiateBattle(originalParticipant, playerPresent) {
-        GameManager.battle = new Battle();
+        let newBattle = !GameManager.battle;
+        if (newBattle) {
+            GameManager.battle = new Battle();
+            if (playerPresent) {
+                GameManager.player.path = [];
+                GameManager.player.canMove = false;
+                GameManager.player.isInBattle = true;
+                GameManager.battle.addParticipant(new BattleParticipant(GameManager.player, GameManager.player.battleLogic, 5));
+            }
+        }
         let participants = this.gatherParticipants(originalParticipant);
         for (let i = 0; i < participants.length; i++) {
             let participant = participants[i];
             participant.isInBattle = true;
-            GameManager.battle.participants.push(new BattleParticipant(participant, participant.getBattleLogic(), 10));
+            GameManager.battle.addParticipant(new BattleParticipant(participant, participant.getBattleLogic(), 10));
         }
-        if (playerPresent) {
-            GameManager.player.path = [];
-            GameManager.player.canMove = false;
-            GameManager.player.isInBattle = true;
-            GameManager.battle.participants.push(new BattleParticipant(GameManager.player, GameManager.player.battleLogic, 5));
+        if (newBattle) {
+            GameManager.battle.start();
         }
-        GameManager.battle.start();
     }
 
     gatherParticipants(originalParticipant) {
@@ -98,11 +103,11 @@ class Monster extends Moveable {
     startMovementToPlayer() {
         let neighboursOfTile = this.manager.tileset.getNeighboursOfTile(GameManager.player.currentTile);
         let closestTile = undefined;
-        let minDist = TILE_SIZE * 7;
+        let minDist = null;
         for (let i = 0; i < neighboursOfTile.length; i++) {
             if (neighboursOfTile[i].walkable) {
                 let dist = manhattanDistance(this.currentTile.x, this.currentTile.y, neighboursOfTile[i].x, neighboursOfTile[i].y);
-                if (minDist > dist) {
+                if (minDist === null || minDist > dist) {
                     closestTile = neighboursOfTile[i];
                     minDist = dist;
                 }
