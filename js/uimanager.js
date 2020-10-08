@@ -125,6 +125,12 @@ class UIActionBar extends UiOpenable {
         let action = new UiAction(this.x - (this.width - (4 * TILE_SIZE)) / 2, canvas.height - 2 * (TILE_SIZE) + HALF_TILE, 110, actionType);
         this.actions.push(action);
     }
+
+    press(number) {
+        if (this.actions[number - 1]) {
+            this.actions[number - 1].select(number);
+        }
+    }
 }
 
 class UiHoverable extends UiElement {
@@ -199,8 +205,13 @@ class UiAction extends UiClickable {
     }
 
     select() {
-        this.selected = true;
-        this.color = 'blue';
+        if (this.selected) {
+            this.selected = false;
+            this.color = "black";
+        } else {
+            this.selected = true;
+            this.color = 'blue';
+        }
     }
 
     unselect() {

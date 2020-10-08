@@ -6,6 +6,8 @@ const TILE_SIZE = 32;
 const WALK_SPEED = 2;
 let DEBUG_MODE = false;
 
+const NUMBERS = '0123456789';
+
 let canvas = null;
 let context = null;
 let nextCounterClearTime = null;
@@ -79,6 +81,8 @@ function keydown(evt) {
     if (evt.key === 'Escape' && clickedObject !== null) {
         clickedObject.unselect();
         clickedObject = null;
+    } else if (NUMBERS.indexOf(evt.key) !== 0) {
+        GameManager.actionBar.press(NUMBERS.indexOf(evt.key));
     }
 }
 
