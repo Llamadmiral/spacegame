@@ -252,3 +252,44 @@ class TimedEvent extends Updatable {
         }
     }
 }
+
+class MouseInteractionWrapper {
+	constructor(object, width, height, hoverable, clickable, z){
+		this.object = object;
+		this.width = width;
+		this.height = height;
+		this.hoverable = hoverable;
+		this.clickable = clickable;
+		this.z = z;
+		addToGameLayer(this);
+	}
+	
+	isCoordinateIn(x, y) {
+        return this.object.x <= x + camera.x && this.object.y <= y + camera.y && this.object.x + this.width >= x + camera.x && this.object.y + this.height >= y + camera.y;
+    }
+	
+	select(){
+		if(this.clickable){
+			this.object.select();
+		}
+	}
+	
+	unselect(){
+		this.object.unselect();
+	}
+	
+	hover(){
+		if(this.hoverable){
+			this.object.hover();
+		}
+	}
+	
+	hoverLeave(){
+		this.object.hoverLeave();
+	}
+	
+	destroy() {
+        GAME_LAYER.splice(UPDATABLE_OBJECTS.indexOf(this), 1);
+    }
+	
+}

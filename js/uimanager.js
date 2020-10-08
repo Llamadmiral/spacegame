@@ -5,7 +5,7 @@ function searchForUI(x, y, array) {
     let obj = null;
     for (let i = 0; i < array.length; i++) {
         let ui = array[i];
-        if (typeof ui.hover === 'function' && ui.isMouseIn(x, y)) {
+        if (typeof ui.isCoordinateIn === 'function' && ui.isCoordinateIn(x, y)) {
             obj = ui;
             break;
         }
@@ -141,7 +141,7 @@ class UiHoverable extends UiElement {
         UI_HOVERABLE_LAYER.push(this);
     }
 
-    isMouseIn(x, y) {
+    isCoordinateIn(x, y) {
         return this.x <= x && this.y <= y && this.x + this.width >= x && this.y + this.height >= y;
     }
 

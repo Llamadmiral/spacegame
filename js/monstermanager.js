@@ -85,6 +85,7 @@ class Monster extends Moveable {
         this.technicalName = img;
         this.manager = manager;
         this.isInBattle = false;
+		this.mouseInteraction = new MouseInteractionWrapper(this, TILE_SIZE, TILE_SIZE, true, false, 11);
         new Observer(GameManager.player, this, "playerStep", this.checkPlayerProximity);
     }
 
@@ -125,13 +126,18 @@ class Monster extends Moveable {
         }, [this, closestTile.x, closestTile.y]);
     }
 
-    select() {
+    hover() {
         this.switchImageTo(this.descriptor.name + '_selected');
     }
 
-    unselect() {
+    hoverLeave() {
         this.switchImageTo(this.technicalName);
     }
+	
+	destroy(){
+		this.mouseInteraction.destroy();
+		super.destroy();
+	}
 }
 
 class Blob extends Monster {

@@ -1,6 +1,7 @@
 const FPS = 60;
 const FRAMERATE = 1000 / FPS;
 const UPDATABLE_OBJECTS = [];
+const GAME_LAYER = [];
 const BACKGROUND_COLOR = 'black';
 const TILE_SIZE = 32;
 const WALK_SPEED = 2;
@@ -18,10 +19,8 @@ let camera = null;
 let observerList = null;
 let loadedImages = 0;
 
-let lastMouseoverX = 0;
-let lastMouseoverY = 0;
 let selectedUiObject = null;
-let objToUnselect = null;
+let selectedGameLayerObject = null;
 let clickedObject = null;
 let runSelectLogic = false;
 
@@ -156,42 +155,50 @@ function initObserverList() {
 }
 
 function selectLogic(evt) {
-    let selectNew = true;
-    if (selectedUiObject !== null) {
+    let selectNew = doUiHoverLogc(evt);
+	if (selectNew) {
+		doGameLayerHoverLogic(evt);
+	}
+}
+
+function doUiHoverLogc(evt){
+	let selectNew = true;
+	if (selectedUiObject !== null) {
         selectNew = false;
-        if (!selectedUiObject.isMouseIn(evt.clientX, evt.clientY)) {
+        if (!selectedUiObject.isCoordinateIn(evt.clientX, evt.clientY)) {
             selectedUiObject.hoverLeave();
             selectedUiObject = null;
             selectNew = true;
         }
     }
-    if (selectNew) {
-        selectedUiObject = searchForUI(evt.clientX, evt.clientY, UI_HOVERABLE_LAYER);
-        if (selectedUiObject === null) {
-            let x = normalizeToGrid(evt.clientX + camera.x);
-            let y = normalizeToGrid(evt.clientY + camera.y);
-            if (lastMouseoverX !== x || lastMouseoverY !== y) {
-                if (objToUnselect) {
-                    objToUnselect.hoverLeave();
-                    objToUnselect = null;
-                }
-                lastMouseoverX = x;
-                lastMouseoverY = y;
-                for (let i = UPDATABLE_OBJECTS.length - 1; i >= 0; i--) {
-                    let obj = UPDATABLE_OBJECTS[i];
-                    if (obj.hasOwnProperty('x') && obj.hasOwnProperty('y') && obj.x === x && obj.y === y) {
-                        if (obj.hover) {
-                            obj.hover();
-                            objToUnselect = obj;
-                        }
-                        break;
-                    }
-                }
-            }
-        } else {
-            selectedUiObject.hover();
-        }
-    }
+	if(selectNew){
+		selectedUiObject = searchForUI(evt.clientX, evt.clientY, UI_HOVERABLE_LAYER);
+		if(selectedUiObject !== null){
+			selectedUiObject.hover();
+			selectNew = false;
+		}
+	}
+	return selectNew;
+}
+
+function doGameLayerHoverLogic(evt){
+	let selectNew = true;
+	if(selectedGameLayerObject !== null){
+		selectNew = false;
+		if(!selectedGameLayerObject.isCoordinateIn(evt.clientX, evt.clientY, GAME_LAYER)){
+			selectedGameLayerObject.hoverLeave();
+			selectedGameLayerObject = null;
+			selectNew = true;
+		}
+	}
+	if(selectNew){
+		selectedGameLayerObject = searchForUI(evt.clientX, evt.clientY, GAME_LAYER);
+		if(selectedGameLayerObject !== null){
+			selectedGameLayerObject.hover();
+			selectNew = false;
+		}
+	}
+	return selectNew;
 }
 
 function refresh() {
@@ -236,6 +243,11 @@ function rnd(from, to) {
 function addToUpdatable(obj) {
     UPDATABLE_OBJECTS.push(obj);
     UPDATABLE_OBJECTS.sort(updatableComparaotr);
+}
+
+function addToGameLayer(obj){
+	GAME_LAYER.push(obj);
+	GAME_LAYER.sort(updatableComparaotr);
 }
 
 function updatableComparaotr(a, b) {
