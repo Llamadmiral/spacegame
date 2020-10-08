@@ -18,7 +18,9 @@ let loadedImages = 0;
 
 let lastMouseoverX = 0;
 let lastMouseoverY = 0;
+let selectedUiObject = null;
 let objToUnselect = null;
+let clickedObject = null;
 let runSelectLogic = false;
 
 let imageDirection = ['right', 'bottom', 'left', 'top'];
@@ -45,7 +47,9 @@ function init() {
 }
 
 function initUI() {
-    GameManager.combatOrderIndicator = new UiCombatOrderIndicator(0, 0, 100);
+    GameManager.combatOrderIndicator = new UiCombatOrderIndicator(100);
+    GameManager.actionBar = new UIActionBar(100);
+    GameManager.actionBar.addAction("pew");
 }
 
 function imagesLoaded() {
@@ -67,6 +71,15 @@ function spawnPlayerTransporter() {
 function addEventListeners() {
     canvas.addEventListener('click', mouseClick);
     canvas.addEventListener('mousemove', mousemove);
+    window.addEventListener('keydown', keydown);
+}
+
+
+function keydown(evt) {
+    if (evt.key === 'Escape' && clickedObject !== null) {
+        clickedObject.unselect();
+        clickedObject = null;
+    }
 }
 
 function mousemove(evt) {
@@ -74,23 +87,28 @@ function mousemove(evt) {
 }
 
 function mouseClick(evt) {
-    let x = normalizeToGrid(evt.clientX + camera.x);
-    let y = normalizeToGrid(evt.clientY + camera.y);
-    if (evt.ctrlKey) {
-        console.log(GameManager.player.tilemap.getTile(x, y));
-    } else if (evt.shiftKey) {
-        let tile = GameManager.player.tilemap.getTile(x, y);
-        if (tile) {
-            GameManager.player.x = x;
-            GameManager.player.y = y;
-            GameManager.player.currentTile = tile;
-        }
-        //tile.switchImageTo("hologram_border_right_mirrored");
-        /*let newTile = LOADED_STRUCTURE_TILES["hologram_border"].build(x, y);
-        GameManager.player.tilemap.addTile(newTile);
-        newTile.discovered = true;*/
+    clickedObject = searchForUI(evt.clientX, evt.clientY, UI_CLICKABLE_LAYER);
+    if (clickedObject !== null) {
+        clickedObject.select();
     } else {
-        GameManager.player.prepareMove(x, y);
+        let x = normalizeToGrid(evt.clientX + camera.x);
+        let y = normalizeToGrid(evt.clientY + camera.y);
+        if (evt.ctrlKey) {
+            console.log(GameManager.player.tilemap.getTile(x, y));
+        } else if (evt.shiftKey) {
+            let tile = GameManager.player.tilemap.getTile(x, y);
+            if (tile) {
+                GameManager.player.x = x;
+                GameManager.player.y = y;
+                GameManager.player.currentTile = tile;
+            }
+            //tile.switchImageTo("hologram_border_right_mirrored");
+            /*let newTile = LOADED_STRUCTURE_TILES["hologram_border"].build(x, y);
+            GameManager.player.tilemap.addTile(newTile);
+            newTile.discovered = true;*/
+        } else {
+            GameManager.player.prepareMove(x, y);
+        }
     }
 }
 
@@ -134,25 +152,40 @@ function initObserverList() {
 }
 
 function selectLogic(evt) {
-    let x = normalizeToGrid(evt.clientX + camera.x);
-    let y = normalizeToGrid(evt.clientY + camera.y);
-    if (lastMouseoverX !== x || lastMouseoverY !== y) {
-        if (objToUnselect) {
-            objToUnselect.unselect();
-            objToUnselect = null;
+    let selectNew = true;
+    if (selectedUiObject !== null) {
+        selectNew = false;
+        if (!selectedUiObject.isMouseIn(evt.clientX, evt.clientY)) {
+            selectedUiObject.hoverLeave();
+            selectedUiObject = null;
+            selectNew = true;
         }
-        lastMouseoverX = x;
-        lastMouseoverY = y;
-        for (let i = UPDATABLE_OBJECTS.length - 1; i >= 0; i--) {
-            let obj = UPDATABLE_OBJECTS[i];
-            if (obj.hasOwnProperty('x') && obj.hasOwnProperty('y') && obj.x === x && obj.y === y) {
-                console.log(obj);
-                if (obj.select) {
-                    obj.select();
-                    objToUnselect = obj;
+    }
+    if (selectNew) {
+        selectedUiObject = searchForUI(evt.clientX, evt.clientY, UI_HOVERABLE_LAYER);
+        if (selectedUiObject === null) {
+            let x = normalizeToGrid(evt.clientX + camera.x);
+            let y = normalizeToGrid(evt.clientY + camera.y);
+            if (lastMouseoverX !== x || lastMouseoverY !== y) {
+                if (objToUnselect) {
+                    objToUnselect.hoverLeave();
+                    objToUnselect = null;
                 }
-                break;
+                lastMouseoverX = x;
+                lastMouseoverY = y;
+                for (let i = UPDATABLE_OBJECTS.length - 1; i >= 0; i--) {
+                    let obj = UPDATABLE_OBJECTS[i];
+                    if (obj.hasOwnProperty('x') && obj.hasOwnProperty('y') && obj.x === x && obj.y === y) {
+                        if (obj.hover) {
+                            obj.hover();
+                            objToUnselect = obj;
+                        }
+                        break;
+                    }
+                }
             }
+        } else {
+            selectedUiObject.hover();
         }
     }
 }

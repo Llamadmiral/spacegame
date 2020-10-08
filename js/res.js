@@ -98,6 +98,8 @@ const IMAGES = [
 
 	{"name":"hologram_border", "src":"img/ui/hologram_border.png", "createRotaiton": true},
 	{"name":"hologram_border_pillar", "src":"img/ui/hologram_border_pillar.png"},
+
+	{"name":"pew", "src":"img/ui/action_icons/pew.png"},
 ];
 
 const STRUCTURES = [
