@@ -108,7 +108,7 @@ class UiCombatOrderIndicator extends UiOpenable {
     }
 }
 
-class UIActionBar extends UiOpenable {
+class UIAbilityBar extends UiOpenable {
     constructor(z) {
         super(normalizeToGrid(canvas.width / 2), canvas.height - (2 * TILE_SIZE), z,
             LOADED_IMAGES["hologram_border_right"],
@@ -116,21 +116,31 @@ class UIActionBar extends UiOpenable {
             LOADED_IMAGES["hologram_border_pillar"],
             LOADED_IMAGES["hologram_border_pillar"]
         );
-        this.actions = [];
-        this.numberOfBars = 9;
-        this.width = (this.numberOfBars + (this.numberOfBars - 2)) * TILE_SIZE;
+        this.abilities = [];
+        this.numberOfSlots = 9;
+        this.width = (this.numberOfSlots + (this.numberOfSlots - 2)) * TILE_SIZE;
+        this.selectedAbility = null;
     }
 
-    addAction(actionType) {
-        let action = new UiAction(this.x - (this.width - (4 * TILE_SIZE)) / 2, canvas.height - 2 * (TILE_SIZE) + HALF_TILE, 110, actionType);
-        this.actions.push(action);
+    addAbility(abilityType) {
+        let action = new UiAbility(this.x - (this.width - (4 * TILE_SIZE)) / 2, canvas.height - 2 * (TILE_SIZE) + HALF_TILE, 110, ABILITIIES[abilityType]);
+        this.abilities.push(action);
     }
 
     press(number) {
-        if (this.actions[number - 1]) {
-            this.actions[number - 1].select(number);
+        let abiNumber = number - 1;
+        if (this.selectedAbility === null || this.selectedAbility !== this.abilities[abiNumber]) {
+            if (this.abilities[abiNumber]) {
+                this.abilities[abiNumber].select();
+                this.selectedAbility = this.abilities[abiNumber];
+            }
+        } else {
+            this.abilities[abiNumber].unselect();
+            this.selectedAbility = null;
         }
     }
+
+
 }
 
 class UiHoverable extends UiElement {
@@ -176,12 +186,13 @@ class UiClickable extends UiHoverable {
     }
 }
 
-class UiAction extends UiClickable {
-    constructor(x, y, z, img) {
+class UiAbility extends UiClickable {
+    constructor(x, y, z, ability) {
         super(x, y, z, TILE_SIZE, TILE_SIZE);
-        this.descriptor = LOADED_IMAGES[img];
+        this.descriptor = LOADED_IMAGES[ability.type];
         this.color = 'black';
         this.selected = false;
+        this.ability = ability;
     }
 
     draw() {
@@ -218,4 +229,45 @@ class UiAction extends UiClickable {
         this.selected = false;
         this.color = 'black';
     }
+}
+
+class MouseInteractionWrapper {
+    constructor(object, width, height, hoverable, clickable, z) {
+        this.object = object;
+        this.width = width;
+        this.height = height;
+        this.hoverable = hoverable;
+        this.clickable = clickable;
+        this.z = z;
+        addToGameLayer(this);
+    }
+
+    isCoordinateIn(x, y) {
+        return this.object.x <= x + camera.x && this.object.y <= y + camera.y && this.object.x + this.width >= x + camera.x && this.object.y + this.height >= y + camera.y;
+    }
+
+    select() {
+        if (this.clickable) {
+            this.object.select();
+        }
+    }
+
+    unselect() {
+        this.object.unselect();
+    }
+
+    hover() {
+        if (this.hoverable) {
+            this.object.hover();
+        }
+    }
+
+    hoverLeave() {
+        this.object.hoverLeave();
+    }
+
+    destroy() {
+        GAME_LAYER.splice(UPDATABLE_OBJECTS.indexOf(this), 1);
+    }
+
 }

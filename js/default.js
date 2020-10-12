@@ -49,8 +49,12 @@ function init() {
 
 function initUI() {
     GameManager.combatOrderIndicator = new UiCombatOrderIndicator(100);
-    GameManager.actionBar = new UIActionBar(100);
-    GameManager.actionBar.addAction("pew");
+    GameManager.actionBar = new UIAbilityBar(100);
+    GameManager.actionBar.addAbility("pew");
+}
+
+function initAbilities() {
+    new AbilityPew();
 }
 
 function imagesLoaded() {
@@ -58,6 +62,7 @@ function imagesLoaded() {
     loadStructures();
     loadStructureMatrixes();
     addEventListeners();
+    initAbilities();
     initUI();
     spawnPlayerTransporter();
     initBackgroundAnimation();
@@ -77,9 +82,13 @@ function addEventListeners() {
 
 
 function keydown(evt) {
-    if (evt.key === 'Escape' && clickedObject !== null) {
-        clickedObject.unselect();
-        clickedObject = null;
+    if (evt.key === 'Escape') {
+        if (GameManager.actionBar.selectedAbility !== null) {
+            GameManager.actionBar.selectedAbility.unselect();
+        } else {
+            clickedObject.unselect();
+            clickedObject = null;
+        }
     } else if (NUMBERS.indexOf(evt.key) !== 0) {
         GameManager.actionBar.press(NUMBERS.indexOf(evt.key));
     }
@@ -110,6 +119,9 @@ function mouseClick(evt) {
             GameManager.player.tilemap.addTile(newTile);
             newTile.discovered = true;*/
         } else {
+            if (clickedObject !== null) {
+
+            }
             GameManager.player.prepareMove(x, y);
         }
     }
@@ -156,14 +168,14 @@ function initObserverList() {
 
 function selectLogic(evt) {
     let selectNew = doUiHoverLogc(evt);
-	if (selectNew) {
-		doGameLayerHoverLogic(evt);
-	}
+    if (selectNew) {
+        doGameLayerHoverLogic(evt);
+    }
 }
 
-function doUiHoverLogc(evt){
-	let selectNew = true;
-	if (selectedUiObject !== null) {
+function doUiHoverLogc(evt) {
+    let selectNew = true;
+    if (selectedUiObject !== null) {
         selectNew = false;
         if (!selectedUiObject.isCoordinateIn(evt.clientX, evt.clientY)) {
             selectedUiObject.hoverLeave();
@@ -171,34 +183,34 @@ function doUiHoverLogc(evt){
             selectNew = true;
         }
     }
-	if(selectNew){
-		selectedUiObject = searchForUI(evt.clientX, evt.clientY, UI_HOVERABLE_LAYER);
-		if(selectedUiObject !== null){
-			selectedUiObject.hover();
-			selectNew = false;
-		}
-	}
-	return selectNew;
+    if (selectNew) {
+        selectedUiObject = searchForUI(evt.clientX, evt.clientY, UI_HOVERABLE_LAYER);
+        if (selectedUiObject !== null) {
+            selectedUiObject.hover();
+            selectNew = false;
+        }
+    }
+    return selectNew;
 }
 
-function doGameLayerHoverLogic(evt){
-	let selectNew = true;
-	if(selectedGameLayerObject !== null){
-		selectNew = false;
-		if(!selectedGameLayerObject.isCoordinateIn(evt.clientX, evt.clientY, GAME_LAYER)){
-			selectedGameLayerObject.hoverLeave();
-			selectedGameLayerObject = null;
-			selectNew = true;
-		}
-	}
-	if(selectNew){
-		selectedGameLayerObject = searchForUI(evt.clientX, evt.clientY, GAME_LAYER);
-		if(selectedGameLayerObject !== null){
-			selectedGameLayerObject.hover();
-			selectNew = false;
-		}
-	}
-	return selectNew;
+function doGameLayerHoverLogic(evt) {
+    let selectNew = true;
+    if (selectedGameLayerObject !== null) {
+        selectNew = false;
+        if (!selectedGameLayerObject.isCoordinateIn(evt.clientX, evt.clientY, GAME_LAYER)) {
+            selectedGameLayerObject.hoverLeave();
+            selectedGameLayerObject = null;
+            selectNew = true;
+        }
+    }
+    if (selectNew) {
+        selectedGameLayerObject = searchForUI(evt.clientX, evt.clientY, GAME_LAYER);
+        if (selectedGameLayerObject !== null) {
+            selectedGameLayerObject.hover();
+            selectNew = false;
+        }
+    }
+    return selectNew;
 }
 
 function refresh() {
@@ -245,9 +257,9 @@ function addToUpdatable(obj) {
     UPDATABLE_OBJECTS.sort(updatableComparaotr);
 }
 
-function addToGameLayer(obj){
-	GAME_LAYER.push(obj);
-	GAME_LAYER.sort(updatableComparaotr);
+function addToGameLayer(obj) {
+    GAME_LAYER.push(obj);
+    GAME_LAYER.sort(updatableComparaotr);
 }
 
 function updatableComparaotr(a, b) {

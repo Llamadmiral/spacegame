@@ -136,9 +136,23 @@ class DockingDoorAnimation extends AnimationGroup {
     }
 }
 
-class Moveable extends Drawable {
-    constructor(x, y, tilemap, src, z) {
+class Damageable extends Drawable {
+    constructor(x, y, src, z, health) {
         super(x, y, src, z);
+        this.health = health;
+    }
+
+    damage(dmgAmount) {
+        this.health -= dmgAmount;
+        if (this.health <= 0) {
+            this.destroy();
+        }
+    }
+}
+
+class Moveable extends Damageable {
+    constructor(x, y, tilemap, src, z, health) {
+        super(x, y, src, z, health);
         this.path = [];
         this.tilemap = tilemap;
         this.currentTile = this.tilemap.getTile(x, y);
@@ -211,30 +225,6 @@ class Moveable extends Drawable {
     }
 }
 
-class Player extends Moveable {
-    constructor(x, y, tilemap) {
-        super(x, y, tilemap, "player", 10);
-        super.stepTrigger = new Trigger(this, "playerStep");
-        this.playerLighting = new PlayerLighting(this);
-        this.isInBattle = false;
-    }
-
-    battleLogic() {
-        this.canMove = true;
-        this.lastStepFunction = function () {
-            GameManager.battle.next();
-        };
-    }
-
-    prepareMove(x, y) {
-        if (this.isInBattle) {
-            this.lastStepTrigger = true;
-        }
-        super.prepareMove(x, y);
-    }
-
-}
-
 class TimedEvent extends Updatable {
     constructor(frames, callback, params) {
         super();
@@ -251,45 +241,4 @@ class TimedEvent extends Updatable {
             this.destroy();
         }
     }
-}
-
-class MouseInteractionWrapper {
-	constructor(object, width, height, hoverable, clickable, z){
-		this.object = object;
-		this.width = width;
-		this.height = height;
-		this.hoverable = hoverable;
-		this.clickable = clickable;
-		this.z = z;
-		addToGameLayer(this);
-	}
-	
-	isCoordinateIn(x, y) {
-        return this.object.x <= x + camera.x && this.object.y <= y + camera.y && this.object.x + this.width >= x + camera.x && this.object.y + this.height >= y + camera.y;
-    }
-	
-	select(){
-		if(this.clickable){
-			this.object.select();
-		}
-	}
-	
-	unselect(){
-		this.object.unselect();
-	}
-	
-	hover(){
-		if(this.hoverable){
-			this.object.hover();
-		}
-	}
-	
-	hoverLeave(){
-		this.object.hoverLeave();
-	}
-	
-	destroy() {
-        GAME_LAYER.splice(UPDATABLE_OBJECTS.indexOf(this), 1);
-    }
-	
 }

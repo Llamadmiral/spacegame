@@ -80,12 +80,13 @@ function canASeeB(a, b, range) {
 }
 
 class Monster extends Moveable {
-    constructor(manager, tile, img) {
-        super(tile.x, tile.y, manager.tileset, img, 11);
+    constructor(manager, tile, img, health) {
+        super(tile.x, tile.y, manager.tileset, img, 11, health);
         this.technicalName = img;
+        this.health = health;
         this.manager = manager;
         this.isInBattle = false;
-		this.mouseInteraction = new MouseInteractionWrapper(this, TILE_SIZE, TILE_SIZE, true, false, 11);
+        this.mouseInteraction = new MouseInteractionWrapper(this, TILE_SIZE, TILE_SIZE, true, false, 11);
         new Observer(GameManager.player, this, "playerStep", this.checkPlayerProximity);
     }
 
@@ -133,16 +134,16 @@ class Monster extends Moveable {
     hoverLeave() {
         this.switchImageTo(this.technicalName);
     }
-	
-	destroy(){
-		this.mouseInteraction.destroy();
-		super.destroy();
-	}
+
+    destroy() {
+        this.mouseInteraction.destroy();
+        super.destroy();
+    }
 }
 
 class Blob extends Monster {
     constructor(manager, tile) {
-        super(manager, tile, "monster_blob");
+        super(manager, tile, "monster_blob", 20);
         this.movespeed = 2;
     }
 
