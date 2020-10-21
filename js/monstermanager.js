@@ -23,12 +23,12 @@ class MonsterManager {
         let newBattle = !GameManager.battle;
         if (newBattle) {
             GameManager.battle = new Battle();
-            if (playerPresent) {
-                GameManager.player.path = [];
-                GameManager.player.canMove = false;
-                GameManager.player.isInBattle = true;
-                GameManager.battle.addParticipant(new BattleParticipant(GameManager.player, GameManager.player.battleLogic, 5));
-            }
+        }
+        if (playerPresent) {
+            GameManager.player.path = [];
+            GameManager.player.canMove = false;
+            GameManager.player.isInBattle = true;
+            GameManager.battle.addParticipant(new BattleParticipant(GameManager.player, GameManager.player.battleLogic, 5));
         }
         let participants = this.gatherParticipants(originalParticipant);
         for (let i = 0; i < participants.length; i++) {
@@ -36,9 +36,7 @@ class MonsterManager {
             participant.isInBattle = true;
             GameManager.battle.addParticipant(new BattleParticipant(participant, participant.getBattleLogic(), 10));
         }
-        if (newBattle) {
-            GameManager.battle.start();
-        }
+        GameManager.battle.start();
     }
 
     gatherParticipants(originalParticipant) {

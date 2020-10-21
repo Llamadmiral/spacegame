@@ -118,18 +118,22 @@ function mouseClick(evt) {
             /*let newTile = LOADED_STRUCTURE_TILES["hologram_border"].build(x, y);
             GameManager.player.tilemap.addTile(newTile);
             newTile.discovered = true;*/
-        } else if (GameManager.player.canMove && GameManager.actionBar.selectedUiAbility !== null) {
-            let ability = GameManager.actionBar.selectedUiAbility.ability;
-            if (ability.targeted) {
-                let monster = GameManager.monsterManager.getMonster(x, y);
-                if (monster !== null) {
-                    ability.cast(GameManager.player, monster);
-                    GameManager.actionBar.deselectAll();
-                    GameManager.battle.next();
+        } else {
+            if (GameManager.player.canMove) {
+                if (GameManager.actionBar.selectedUiAbility !== null) {
+                    let ability = GameManager.actionBar.selectedUiAbility.ability;
+                    if (ability.targeted) {
+                        let monster = GameManager.monsterManager.getMonster(x, y);
+                        if (monster !== null) {
+                            ability.cast(GameManager.player, monster);
+                            GameManager.actionBar.deselectAll();
+                            GameManager.battle.next();
+                        }
+                    }
+                } else {
+                    GameManager.player.prepareMove(x, y);
                 }
             }
-        } else {
-            GameManager.player.prepareMove(x, y);
         }
     }
 }

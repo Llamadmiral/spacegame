@@ -57,6 +57,7 @@ class Battle {
             this.participants = [];
             GameManager.combatOrderIndicator.close();
             GameManager.player.leaveBattle();
+            this.index = 0;
         } else {
             GameManager.cameraTarget = this.participants[this.index].participant;
             this.participants[this.index].performRound();
