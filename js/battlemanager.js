@@ -54,10 +54,10 @@ class Battle {
     next() {
         if (this.participants.length === 1) {
             console.log('Battle ended!');
-            this.participants = [];
             GameManager.combatOrderIndicator.close();
             GameManager.player.leaveBattle();
             this.index = 0;
+            this.started = false;
         } else {
             GameManager.cameraTarget = this.participants[this.index].participant;
             this.participants[this.index].performRound();

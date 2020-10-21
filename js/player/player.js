@@ -6,6 +6,7 @@ class Player extends Moveable {
         super.stepTrigger = new Trigger(this, "playerStep");
         this.playerLighting = new PlayerLighting(this);
         this.health = 100;
+        this.maxHealth = 100;
         this.isInBattle = false;
         this.selectedAction = null;
     }
@@ -53,6 +54,6 @@ class AbilityPew extends Ability {
 
     cast(caster, target) {
         console.log('Cast spell ' + this.type + ' on ' + target.constructor.name);
-        target.damage(20);
+        target.damage(10);
     }
 }

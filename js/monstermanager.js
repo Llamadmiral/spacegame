@@ -23,12 +23,14 @@ class MonsterManager {
         let newBattle = !GameManager.battle;
         if (newBattle) {
             GameManager.battle = new Battle();
+            if (playerPresent) {
+                GameManager.battle.addParticipant(new BattleParticipant(GameManager.player, GameManager.player.battleLogic, 5));
+            }
         }
-        if (playerPresent) {
+        if(playerPresent){
             GameManager.player.path = [];
             GameManager.player.canMove = false;
             GameManager.player.isInBattle = true;
-            GameManager.battle.addParticipant(new BattleParticipant(GameManager.player, GameManager.player.battleLogic, 5));
         }
         let participants = this.gatherParticipants(originalParticipant);
         for (let i = 0; i < participants.length; i++) {
@@ -99,6 +101,7 @@ class Monster extends Moveable {
     constructor(manager, tile, img, health) {
         super(tile.x, tile.y, GameManager.monsterManager.tileset, img, 11, health);
         this.technicalName = img;
+        this.maxHealth = health;
         this.health = health;
         this.isInBattle = false;
         this.mouseInteraction = new MouseInteractionWrapper(this, TILE_SIZE, TILE_SIZE, true, false, 11);

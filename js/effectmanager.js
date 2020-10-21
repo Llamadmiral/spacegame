@@ -1,4 +1,5 @@
 const HALF_TILE = TILE_SIZE / 2;
+const QUARTER_TILE = HALF_TILE / 2;
 const AMOUNT_OF_RAYS = 600;
 
 class PathEffect extends Updatable {

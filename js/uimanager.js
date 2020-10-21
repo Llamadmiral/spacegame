@@ -90,20 +90,23 @@ class UiCombatOrderIndicator extends UiOpenable {
         let diff = Math.ceil(this.width / 2);
         context.fillStyle = 'rgb(44 232 226 / 0.50)';
         context.fillRect(middle - (diff) + TILE_SIZE, 0, this.width - TILE_SIZE, 2 * TILE_SIZE);
-        if (this.battle) {
-            let fullLength = this.battle.participants.length * TILE_SIZE;
+        if (this.battle && this.battle.started) {
+            let fullLength = this.battle.participants.length * (TILE_SIZE + QUARTER_TILE);
             for (let i = 0; i < this.battle.participants.length; i++) {
                 let participant = this.battle.participants[i].participant;
+                let maxHealthRatio = (participant.health / participant.maxHealth);
                 let img = participant.descriptor.img;
-                let startX = middle + i * TILE_SIZE + (HALF_TILE) - (fullLength / 2);
+                let startX = middle + i * (TILE_SIZE + QUARTER_TILE) + (HALF_TILE) - (fullLength / 2);
                 context.drawImage(img, startX, HALF_TILE);
+                context.fillStyle = 'red';
+                context.fillRect(startX, HALF_TILE + TILE_SIZE, TILE_SIZE * maxHealthRatio, HALF_TILE);
             }
         }
     }
 
     init(battle) {
         this.battle = battle;
-        let newSize = (1 + battle.participants.length) * TILE_SIZE;
+        let newSize = (1 + battle.participants.length) * (TILE_SIZE + QUARTER_TILE);
         this.open(newSize);
     }
 }
