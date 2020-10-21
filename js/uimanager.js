@@ -119,7 +119,7 @@ class UIAbilityBar extends UiOpenable {
         this.abilities = [];
         this.numberOfSlots = 9;
         this.width = (this.numberOfSlots + (this.numberOfSlots - 2)) * TILE_SIZE;
-        this.selectedAbility = null;
+        this.selectedUiAbility = null;
     }
 
     addAbility(abilityType) {
@@ -129,14 +129,21 @@ class UIAbilityBar extends UiOpenable {
 
     press(number) {
         let abiNumber = number - 1;
-        if (this.selectedAbility === null || this.selectedAbility !== this.abilities[abiNumber]) {
+        if (this.selectedUiAbility === null || this.selectedUiAbility !== this.abilities[abiNumber]) {
             if (this.abilities[abiNumber]) {
                 this.abilities[abiNumber].select();
-                this.selectedAbility = this.abilities[abiNumber];
+                this.selectedUiAbility = this.abilities[abiNumber];
             }
         } else {
             this.abilities[abiNumber].unselect();
-            this.selectedAbility = null;
+            this.selectedUiAbility = null;
+        }
+    }
+
+    deselectAll() {
+        if (this.selectedUiAbility !== null) {
+            this.selectedUiAbility.unselect();
+            this.selectedUiAbility = null;
         }
     }
 

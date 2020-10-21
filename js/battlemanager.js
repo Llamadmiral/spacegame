@@ -29,6 +29,21 @@ class Battle {
         }
     }
 
+    removeParticipant(participant) {
+        let indexToRemove = -1;
+        for (let i = 0; i < this.participants.length; i++) {
+            if (this.participants[i].participant === participant) {
+                indexToRemove = i;
+                break;
+            }
+        }
+        if (indexToRemove > -1) {
+            this.participants.splice(indexToRemove, 1);
+        } else {
+            console.log('Unable to find participant', participant);
+        }
+    }
+
     start() {
         this.participants.sort(battleSpeedComparator);
         GameManager.combatOrderIndicator.init(this);
@@ -37,9 +52,16 @@ class Battle {
     }
 
     next() {
-        GameManager.cameraTarget = this.participants[this.index].participant;
-        this.participants[this.index].performRound();
-        this.index = (this.index + 1) % this.participants.length;
+        if (this.participants.length === 1) {
+            console.log('Battle ended!');
+            this.participants = [];
+            GameManager.combatOrderIndicator.close();
+            GameManager.player.leaveBattle();
+        } else {
+            GameManager.cameraTarget = this.participants[this.index].participant;
+            this.participants[this.index].performRound();
+            this.index = (this.index + 1) % this.participants.length;
+        }
     }
 
 }

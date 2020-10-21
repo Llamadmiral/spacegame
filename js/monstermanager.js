@@ -61,6 +61,24 @@ class MonsterManager {
         }
         return participants;
     }
+
+    getMonster(x, y) {
+        let monster = null;
+        for (let i = 0; i < this.monsters.length; i++) {
+            let possibleMonster = this.monsters[i];
+            if (possibleMonster.x === x && possibleMonster.y === y) {
+                monster = possibleMonster;
+                break;
+            }
+        }
+        return monster;
+    }
+
+    removeMonster(monster) {
+        GameManager.battle.removeParticipant(monster);
+        this.monsters.splice(this.monsters.indexOf(monster), 1);
+    }
+
 }
 
 function canASeeB(a, b, range) {
@@ -70,7 +88,7 @@ function canASeeB(a, b, range) {
         let deltaX = b.currentTile.x - a.x;
         let deltaY = a.y - b.currentTile.y;
         let angle = -Math.atan2(deltaY, deltaX);
-        let ray = new Ray(a.currentTile, angle, a.manager.tileset);
+        let ray = new Ray(a.currentTile, angle, GameManager.monsterManager.tileset);
         ray.cast();
         if (ray.traveledTiles.indexOf(b.currentTile) !== -1) {
             canSee = true;
@@ -81,10 +99,9 @@ function canASeeB(a, b, range) {
 
 class Monster extends Moveable {
     constructor(manager, tile, img, health) {
-        super(tile.x, tile.y, manager.tileset, img, 11, health);
+        super(tile.x, tile.y, GameManager.monsterManager.tileset, img, 11, health);
         this.technicalName = img;
         this.health = health;
-        this.manager = manager;
         this.isInBattle = false;
         this.mouseInteraction = new MouseInteractionWrapper(this, TILE_SIZE, TILE_SIZE, true, false, 11);
         new Observer(GameManager.player, this, "playerStep", this.checkPlayerProximity);
@@ -94,7 +111,7 @@ class Monster extends Moveable {
         if (!this.isInBattle) {
             let canSee = canASeeB(this, GameManager.player, 6);
             if (canSee) {
-                this.manager.initiateBattle(this, true);
+                GameManager.monsterManager.initiateBattle(this, true);
             }
         }
     }
@@ -103,7 +120,7 @@ class Monster extends Moveable {
     }
 
     startMovementToPlayer() {
-        let neighboursOfTile = this.manager.tileset.getNeighboursOfTile(GameManager.player.currentTile);
+        let neighboursOfTile = GameManager.monsterManager.tileset.getNeighboursOfTile(GameManager.player.currentTile);
         let closestTile = undefined;
         let minDist = null;
         for (let i = 0; i < neighboursOfTile.length; i++) {
@@ -137,6 +154,7 @@ class Monster extends Moveable {
 
     destroy() {
         this.mouseInteraction.destroy();
+        GameManager.monsterManager.removeMonster(this);
         super.destroy();
     }
 }

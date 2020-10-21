@@ -83,8 +83,8 @@ function addEventListeners() {
 
 function keydown(evt) {
     if (evt.key === 'Escape') {
-        if (GameManager.actionBar.selectedAbility !== null) {
-            GameManager.actionBar.selectedAbility.unselect();
+        if (GameManager.actionBar.selectedUiAbility !== null) {
+            GameManager.actionBar.selectedUiAbility.unselect();
         } else {
             clickedObject.unselect();
             clickedObject = null;
@@ -118,10 +118,17 @@ function mouseClick(evt) {
             /*let newTile = LOADED_STRUCTURE_TILES["hologram_border"].build(x, y);
             GameManager.player.tilemap.addTile(newTile);
             newTile.discovered = true;*/
-        } else {
-            if (clickedObject !== null) {
-
+        } else if (GameManager.actionBar.selectedUiAbility !== null) {
+            let ability = GameManager.actionBar.selectedUiAbility.ability;
+            if (ability.targeted) {
+                let monster = GameManager.monsterManager.getMonster(x, y);
+                if (monster !== null) {
+                    ability.cast(GameManager.player, monster);
+                    GameManager.actionBar.deselectAll();
+                    GameManager.battle.next();
+                }
             }
+        } else {
             GameManager.player.prepareMove(x, y);
         }
     }

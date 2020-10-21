@@ -24,6 +24,13 @@ class Player extends Moveable {
         super.prepareMove(x, y);
     }
 
+    leaveBattle() {
+        this.canMove = true;
+        this.lastStepFunction = null;
+        this.lastStepTrigger = false;
+        this.isInBattle = false;
+    }
+
 }
 
 class Ability {
@@ -45,6 +52,7 @@ class AbilityPew extends Ability {
     }
 
     cast(caster, target) {
+        console.log('Cast spell ' + this.type + ' on ' + target.constructor.name);
         target.damage(20);
     }
 }
