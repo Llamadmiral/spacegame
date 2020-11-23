@@ -35,25 +35,34 @@ class Player extends Moveable {
 }
 
 class Ability {
-    constructor(type, aoe, targeted) {
+    constructor(type, aoe, targeted, damage) {
         this.type = type;
         this.aoe = aoe;
         this.targeted = targeted;
+        this.damage = damage;
         ABILITIIES[type] = this;
     }
 
     cast(caster, target) {
         console.log('Not implemented!', this, type);
     }
+
+    getDescription() {
+        return null;
+    }
 }
 
 class AbilityPew extends Ability {
     constructor() {
-        super("pew", false, true);
+        super("pew", false, true, 10);
     }
 
     cast(caster, target) {
         console.log('Cast spell ' + this.type + ' on ' + target.constructor.name);
-        target.damage(10);
+        target.damage(this.damage);
+    }
+
+    getDescription() {
+        return 'Deals ' + this.damage + ' damage to a single target.';
     }
 }

@@ -1,6 +1,8 @@
 const UI_HOVERABLE_LAYER = [];
 const UI_CLICKABLE_LAYER = [];
 
+const TOOLTIP_FONT = '20px serif';
+
 function searchForUI(x, y, array) {
     let obj = null;
     for (let i = 0; i < array.length; i++) {
@@ -205,6 +207,7 @@ class UiAbility extends UiClickable {
         this.color = 'black';
         this.selected = false;
         this.ability = ability;
+        this.tooltip = null;
     }
 
     draw() {
@@ -218,12 +221,19 @@ class UiAbility extends UiClickable {
     hover() {
         if (!this.selected) {
             this.color = 'red';
+            let desc = this.ability.getDescription();
+            if (desc !== null) {
+                this.tooltip = new UIToolTip(this.x, this.y - (TILE_SIZE * 2), 10, TILE_SIZE, desc);
+            }
         }
     }
 
     hoverLeave() {
         if (!this.selected) {
             this.color = 'black';
+            if (this.tooltip !== null) {
+                this.tooltip.destroy();
+            }
         }
     }
 
@@ -241,6 +251,27 @@ class UiAbility extends UiClickable {
         super.unselect();
         this.selected = false;
         this.color = 'black';
+    }
+}
+
+class UIToolTip extends UiElement {
+    constructor(x, y, z, height, text) {
+        super(x, y, z);
+        context.font = TOOLTIP_FONT;
+        let measurement = context.measureText(text);
+        this.width = measurement.width;
+        this.height = 20;
+        this.text = text;
+    }
+
+    draw() {
+        let widthPadding = this.width / 20;
+        let heightPadding = this.height / 10;
+        context.beginPath();
+        context.fillStyle = 'rgb(44 232 226 / 0.50)';
+        context.fillRect(this.x - (this.width / 2), this.y, this.width + widthPadding, this.height + heightPadding);
+        context.font = TOOLTIP_FONT;
+        context.fillText(this.text, this.x - (this.width / 2) + (widthPadding / 2), this.y + this.height - heightPadding);
     }
 }
 
