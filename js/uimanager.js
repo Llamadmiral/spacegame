@@ -1,7 +1,7 @@
 const UI_HOVERABLE_LAYER = [];
 const UI_CLICKABLE_LAYER = [];
 
-const TOOLTIP_FONT = '20px serif';
+const TOOLTIP_FONT = '20px spacefont';
 
 function searchForUI(x, y, array) {
     let obj = null;
