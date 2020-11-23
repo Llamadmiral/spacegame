@@ -8,8 +8,8 @@ class Camera extends Updatable {
     }
 
     update() {
-        this.x = GameManager.cameraTarget.x - (this.width / 2);
-        this.y = GameManager.cameraTarget.y - (this.height / 2);
+        this.x = GameManager.instance.cameraTarget.x - (this.width / 2);
+        this.y = GameManager.instance.cameraTarget.y - (this.height / 2);
     }
 
 

@@ -271,7 +271,7 @@ class Door extends Tile {
         new TimedEvent(this.openLength,
             function (params) {
                 params.passesLight = false;
-                GameManager.player.playerLighting.recalculateTiles();
+                GameManager.instance.player.playerLighting.recalculateTiles();
             },
             this
         );

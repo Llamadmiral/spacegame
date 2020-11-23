@@ -7,6 +7,7 @@ class BattleParticipant {
         this.participant = participant;
         this.battleLogic = battleLogic;
         this.speed = speed;
+        this.isPlayer = false;
     }
 
     performRound() {
@@ -25,7 +26,7 @@ class Battle {
         this.participants.push(participant);
         if (this.started) {
             this.participants.sort(battleSpeedComparator);
-            GameManager.combatOrderIndicator.init(this);
+            GameManager.instance.combatOrderIndicator.init(this);
         }
     }
 
@@ -44,9 +45,20 @@ class Battle {
         }
     }
 
+    hasPlayer() {
+        let has = false;
+        for (let i = 0; i < this.participants.length; i++) {
+            if (this.participants[i].isPlayer) {
+                has = true;
+                break;
+            }
+        }
+        return has;
+    }
+
     start() {
         this.participants.sort(battleSpeedComparator);
-        GameManager.combatOrderIndicator.init(this);
+        GameManager.instance.combatOrderIndicator.init(this);
         this.started = true;
         this.next();
     }
@@ -54,12 +66,12 @@ class Battle {
     next() {
         if (this.participants.length === 1) {
             console.log('Battle ended!');
-            GameManager.combatOrderIndicator.close();
-            GameManager.player.leaveBattle();
+            GameManager.instance.combatOrderIndicator.close();
+            GameManager.instance.player.leaveBattle();
             this.index = 0;
             this.started = false;
         } else {
-            GameManager.cameraTarget = this.participants[this.index].participant;
+            GameManager.instance.cameraTarget = this.participants[this.index].participant;
             this.participants[this.index].performRound();
             this.index = (this.index + 1) % this.participants.length;
         }

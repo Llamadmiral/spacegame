@@ -5,6 +5,7 @@ const GAME_LAYER = [];
 const BACKGROUND_COLOR = 'black';
 const TILE_SIZE = 32;
 const WALK_SPEED = 2;
+
 let DEBUG_MODE = false;
 
 const NUMBERS = '0123456789';
@@ -40,7 +41,9 @@ function $(id) {
     return document.getElementById(id);
 }
 
+
 function init() {
+    new GameManager();
     initCanvas();
     initCamera();
     initObserverList();
@@ -48,9 +51,9 @@ function init() {
 }
 
 function initUI() {
-    GameManager.combatOrderIndicator = new UiCombatOrderIndicator(100);
-    GameManager.actionBar = new UIAbilityBar(100);
-    GameManager.actionBar.addAbility("pew");
+    GameManager.instance.combatOrderIndicator = new UiCombatOrderIndicator(100);
+    GameManager.instance.actionBar = new UIAbilityBar(100);
+    GameManager.instance.actionBar.addAbility("pew");
 }
 
 function initAbilities() {
@@ -83,14 +86,14 @@ function addEventListeners() {
 
 function keydown(evt) {
     if (evt.key === 'Escape') {
-        if (GameManager.actionBar.selectedUiAbility !== null) {
-            GameManager.actionBar.selectedUiAbility.unselect();
+        if (GameManager.instance.actionBar.selectedUiAbility !== null) {
+            GameManager.instance.actionBar.selectedUiAbility.unselect();
         } else {
             clickedObject.unselect();
             clickedObject = null;
         }
     } else if (NUMBERS.indexOf(evt.key) !== 0) {
-        GameManager.actionBar.press(NUMBERS.indexOf(evt.key));
+        GameManager.instance.actionBar.press(NUMBERS.indexOf(evt.key));
     }
 }
 
@@ -106,32 +109,32 @@ function mouseClick(evt) {
         let x = normalizeToGrid(evt.clientX + camera.x);
         let y = normalizeToGrid(evt.clientY + camera.y);
         if (evt.ctrlKey) {
-            console.log(GameManager.player.tilemap.getTile(x, y));
+            console.log(GameManager.instance.player.tilemap.getTile(x, y));
         } else if (evt.shiftKey) {
-            let tile = GameManager.player.tilemap.getTile(x, y);
+            let tile = GameManager.instance.player.tilemap.getTile(x, y);
             if (tile) {
-                GameManager.player.x = x;
-                GameManager.player.y = y;
-                GameManager.player.currentTile = tile;
+                GameManager.instance.player.x = x;
+                GameManager.instance.player.y = y;
+                GameManager.instance.player.currentTile = tile;
             }
             //tile.switchImageTo("hologram_border_right_mirrored");
             /*let newTile = LOADED_STRUCTURE_TILES["hologram_border"].build(x, y);
-            GameManager.player.tilemap.addTile(newTile);
+            GameManager.instance.player.tilemap.addTile(newTile);
             newTile.discovered = true;*/
         } else {
-            if (GameManager.player.canMove) {
-                if (GameManager.actionBar.selectedUiAbility !== null) {
-                    let ability = GameManager.actionBar.selectedUiAbility.ability;
+            if (GameManager.instance.player.canMove) {
+                if (GameManager.instance.actionBar.selectedUiAbility !== null) {
+                    let ability = GameManager.instance.actionBar.selectedUiAbility.ability;
                     if (ability.targeted) {
-                        let monster = GameManager.monsterManager.getMonster(x, y);
+                        let monster = GameManager.instance.monsterManager.getMonster(x, y);
                         if (monster !== null) {
-                            ability.cast(GameManager.player, monster);
-                            GameManager.actionBar.deselectAll();
-                            GameManager.battle.next();
+                            ability.cast(GameManager.instance.player, monster);
+                            GameManager.instance.actionBar.deselectAll();
+                            GameManager.instance.battle.next();
                         }
                     }
                 } else {
-                    GameManager.player.prepareMove(x, y);
+                    GameManager.instance.player.prepareMove(x, y);
                 }
             }
         }

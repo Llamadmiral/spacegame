@@ -14,7 +14,7 @@ class Player extends Moveable {
     battleLogic() {
         this.canMove = true;
         this.lastStepFunction = function () {
-            GameManager.battle.next();
+            GameManager.instance.battle.next();
         };
     }
 

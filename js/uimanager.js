@@ -185,9 +185,11 @@ class UiClickable extends UiHoverable {
     }
 
     select() {
+        GameManager.instance.actionBar.selectedUiAbility = this;
     }
 
     unselect() {
+        GameManager.instance.actionBar.selectedUiAbility = null;
     }
 
     destroy() {
@@ -226,9 +228,9 @@ class UiAbility extends UiClickable {
     }
 
     select() {
+        super.select();
         if (this.selected) {
-            this.selected = false;
-            this.color = "black";
+            this.unselect();
         } else {
             this.selected = true;
             this.color = 'blue';
@@ -236,6 +238,7 @@ class UiAbility extends UiClickable {
     }
 
     unselect() {
+        super.unselect();
         this.selected = false;
         this.color = 'black';
     }
@@ -277,7 +280,7 @@ class MouseInteractionWrapper {
     }
 
     destroy() {
-        GAME_LAYER.splice(UPDATABLE_OBJECTS.indexOf(this), 1);
+        GAME_LAYER.splice(GAME_LAYER.indexOf(this), 1);
     }
 
 }
