@@ -7,7 +7,7 @@ const NEIGHBOUR_OFFSETS = [
 ];
 
 const MAX_ROOM_DIMENSION = 11 + 1;
-const MIN_ROOM_DIMENSION = 3;
+const MIN_ROOM_DIMENSION = 5;
 const MAX_ROOM_OFFSET = 6 + 1;
 const MIN_ROOM_OFFSET = 0 + 1;
 
@@ -19,20 +19,22 @@ function generateShip() {
     let rooms = [];
 
     for (let i = 0; i < numberOfRooms; i++) {
-        let roomX = rnd(MIN_ROOM_OFFSET, MAX_ROOM_OFFSET);
-        let roomY = rnd(MIN_ROOM_OFFSET, MAX_ROOM_OFFSET);
         let roomWidth = rnd(MIN_ROOM_DIMENSION, MAX_ROOM_DIMENSION);
+        if (roomWidth % 2 === 0) {
+            roomWidth += 1;
+        }
         let roomHeight = rnd(MIN_ROOM_DIMENSION, MAX_ROOM_DIMENSION);
+        let roomX = MAX_ROOM_OFFSET - Math.floor(roomWidth / 2)
+        let roomY = rnd(MIN_ROOM_OFFSET, MAX_ROOM_OFFSET);
         let room = new Box(roomX, roomY, roomWidth, roomHeight);
         if (rooms.length === 0) {
             rooms.push(room);
         } else {
-            let directionToStickTo = rnd(0, 4);
             let collidesWithOthers = room.doCollideMultiple(rooms);
             if (!collidesWithOthers) {
                 rooms.push(room);
             } else {
-                let offset = DIRECTIONS[directionToStickTo];
+                let offset = DIRECTIONS[Math.random() < 0.5 ? 0 : 2]; // so that our ship is a LONG BOYE vertically
                 while (collidesWithOthers) {
                     room.move(offset[0], offset[1]);
                     collidesWithOthers = room.doCollideMultiple(rooms);
@@ -163,7 +165,7 @@ class StructureTile {
         } else {
             image = this.tileImage;
         }
-        return new this.clazz(x, y, image, this.walkable, this.passesLight);
+        return new this.clazz(x, y, this.name, image, this.walkable, this.passesLight);
     }
 }
 
@@ -215,79 +217,102 @@ class Ship extends Tilemap {
         if (!foundDockingTile) {
             console.log('Could not find docking tile...');
         }
+        this.showAllTiles();
     }
 }
 
 class PlayerTransporter extends Updatable {
     constructor() {
         super();
+        this.isArriving = false;
         this.arrived = false;
         this.startedDocking = false;
-        this.otherShip = generateShip();
-        this.otherShip.build();
-        this.otherShip.showAllTiles();
-        this.x = this.otherShip.dockingTile.x - (TILE_SIZE * 15) - (TILE_SIZE * 6);
-        this.y = this.otherShip.dockingTile.y - (TILE_SIZE * 15);
+        this.x = 0;
+        this.y = 0;
         this.ship = LOADED_STRUCTURES["player_ship"].build(this.x, this.y);
-        this.dockingTile = this.ship.getTile(this.x + TILE_SIZE * 6, this.y + TILE_SIZE);
-        GameManager.instance.player = new Player(this.x + 2 * TILE_SIZE, this.y, this.ship);
+        this.dockingTile = this.ship.getTileByName("docking_door_vertical_right");
+        this.otherShip = null;
+        let spawnPoint = this.ship.getTileByName("spawn_point");
+        GameManager.instance.player = new Player(spawnPoint.x, spawnPoint.y, this.ship);
         GameManager.instance.cameraTarget = GameManager.instance.player;
-        GameManager.instance.monsterManager = new MonsterManager(3, this.otherShip);
-        GameManager.instance.monsterManager.spawnMonsters();
         this.ship.showAllTiles();
         this.initDockingDoorAnimationGroup();
     }
 
     initDockingDoorAnimationGroup() {
-        let dockingTop = this.ship.getTile(this.dockingTile.x, this.dockingTile.y - TILE_SIZE);
-        let dockingBottom = this.ship.getTile(this.dockingTile.x, this.dockingTile.y + TILE_SIZE);
+        let dockingTop = this.ship.getTileByName("docking_door_vertical_top_right");
+        let dockingBottom = this.ship.getTileByName("docking_door_vertical_bottom_right");
         let dockingAnimationGroup = new DockingDoorAnimation([dockingTop, this.dockingTile, dockingBottom]);
         new Observer(this.dockingTile, dockingAnimationGroup, "onDoorEnter", dockingAnimationGroup.open);
         new Observer(this.dockingTile, dockingAnimationGroup, "onDoorLeave", dockingAnimationGroup.close);
     }
 
     update() {
-        let quickMode = true;
-        if (!this.arrived) {
-            let offsetX = 0;
-            let offsetY = 0;
-            if (this.dockingTile.x !== this.otherShip.dockingTile.x - (6 * TILE_SIZE)) {
-                offsetX = quickMode ? TILE_SIZE : 1;
+        if (this.isArriving) {
+            let quickMode = false;
+            if (!this.arrived) {
+                this.arriveAtDestination(quickMode);
+            } else if (!this.startedDocking) {
+                this.startDocking(quickMode);
+                this.isArriving = false;
             }
-            if (this.dockingTile.y !== this.otherShip.dockingTile.y) {
-                offsetY = quickMode ? TILE_SIZE : 1;
-            }
-            this.ship.move(offsetX, offsetY);
-            GameManager.instance.player.x += offsetX;
-            GameManager.instance.player.y += offsetY;
-            if (this.dockingTile.y === this.otherShip.dockingTile.y && this.dockingTile.x === this.otherShip.dockingTile.x - (6 * TILE_SIZE)) {
-                this.arrived = true;
-            }
-        } else if (!this.startedDocking) {
-            this.ship.reassignKeys();
-            this.startedDocking = true;
-            for (let i = 1; i < 6; i++) {
-                let timeout = quickMode ? i : (FPS * (i + 1)) / 2;
-                new TimedEvent(timeout,
-                    function (params) {
-                        let bridgeTop = LOADED_STRUCTURE_TILES["ship_bridge_top_c"].build(params[1].x + TILE_SIZE * params[2], params[1].y - TILE_SIZE, "TILE_Floor_Bridge_C");
-                        let bridgeFloor = LOADED_STRUCTURE_TILES["ship_bridge_floor_c"].build(params[1].x + TILE_SIZE * params[2], params[1].y, "TILE_Floor_Bridge_C");
-                        let bridgeBottom = LOADED_STRUCTURE_TILES["ship_bridge_bottom_c"].build(params[1].x + TILE_SIZE * params[2], params[1].y + TILE_SIZE, "TILE_Floor_Bridge_C");
-                        bridgeFloor.discovered = true;
-                        bridgeTop.discovered = true;
-                        bridgeBottom.discovered = true;
-                        params[0].addTile(bridgeTop);
-                        params[0].addTile(bridgeFloor);
-                        params[0].addTile(bridgeBottom);
-                    },
-                    [this.ship, this.dockingTile, i]);
-            }
-            new TimedEvent(quickMode ? 10 : FPS * 3,
-                function (param) {
-                    param.ship.mergeMap(param.otherShip)
-                },
-                this
-            );
         }
+    }
+
+    startArrivingAtDestination(otherShip) {
+        if (otherShip.dockingTile !== null) {
+            this.isArriving = true;
+            this.otherShip = otherShip;
+            GameManager.instance.monsterManager = new MonsterManager(3, this.otherShip);
+            GameManager.instance.monsterManager.spawnMonsters();
+        } else {
+            console.log('Will not dock to ship with not-existing dock!');
+        }
+    }
+
+    arriveAtDestination(quickMode) {
+        let offsetX = 0;
+        let offsetY = 0;
+        let moveSpeed = TILE_SIZE / 4;
+        if (this.dockingTile.x !== this.otherShip.dockingTile.x - (6 * TILE_SIZE)) {
+            offsetX = quickMode ? TILE_SIZE : moveSpeed;
+        }
+        if (this.dockingTile.y !== this.otherShip.dockingTile.y) {
+            offsetY = quickMode ? TILE_SIZE : moveSpeed;
+        }
+        this.ship.move(offsetX, -offsetY);
+        GameManager.instance.player.x += offsetX;
+        GameManager.instance.player.y -= offsetY;
+        if (this.dockingTile.y === this.otherShip.dockingTile.y && this.dockingTile.x === this.otherShip.dockingTile.x - (6 * TILE_SIZE)) {
+            this.arrived = true;
+        }
+    }
+
+    startDocking(quickMode) {
+        this.ship.reassignKeys();
+        this.startedDocking = true;
+        let dockPartAddingTimeOffset = FPS / 4;
+        for (let i = 1; i < 6; i++) {
+            let timeout = quickMode ? i : dockPartAddingTimeOffset * i;
+            new TimedEvent(timeout,
+                function (params) {
+                    let bridgeTop = LOADED_STRUCTURE_TILES["ship_bridge_top_c"].build(params[1].x + TILE_SIZE * params[2], params[1].y - TILE_SIZE, "TILE_Floor_Bridge_C");
+                    let bridgeFloor = LOADED_STRUCTURE_TILES["ship_bridge_floor_c"].build(params[1].x + TILE_SIZE * params[2], params[1].y, "TILE_Floor_Bridge_C");
+                    let bridgeBottom = LOADED_STRUCTURE_TILES["ship_bridge_bottom_c"].build(params[1].x + TILE_SIZE * params[2], params[1].y + TILE_SIZE, "TILE_Floor_Bridge_C");
+                    bridgeFloor.discovered = true;
+                    bridgeTop.discovered = true;
+                    bridgeBottom.discovered = true;
+                    params[0].addTile(bridgeTop);
+                    params[0].addTile(bridgeFloor);
+                    params[0].addTile(bridgeBottom);
+                },
+                [this.ship, this.dockingTile, i]);
+        }
+        new TimedEvent(quickMode ? 10 : dockPartAddingTimeOffset * 6,
+            function (param) {
+                param.ship.mergeMap(param.otherShip)
+            },
+            this
+        );
     }
 }

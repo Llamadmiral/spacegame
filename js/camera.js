@@ -12,5 +12,4 @@ class Camera extends Updatable {
         this.y = GameManager.instance.cameraTarget.y - (this.height / 2);
     }
 
-
 }

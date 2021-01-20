@@ -27,7 +27,7 @@ class Drawable extends Updatable {
         this.y = y;
         let descriptor = LOADED_IMAGES[imageName];
         if (!descriptor) {
-            console.log("Image is without Image descriptor!", imageName);
+            throw "Image is without Image descriptor: " + imageName;
         }
         this.descriptor = descriptor;
         this.currentFrame = 0;

@@ -50,17 +50,21 @@ function init() {
     loadImages();
 }
 
-function initUI() {
-    GameManager.instance.combatOrderIndicator = new UiCombatOrderIndicator(100);
-    GameManager.instance.actionBar = new UIAbilityBar(100);
-    GameManager.instance.actionBar.addAbility("pew");
-}
-
-function initAbilities() {
-    new AbilityPew();
-}
-
 function imagesLoaded() {
+    loadFont();
+}
+
+function loadFont() {
+    let junction_font = new FontFace('spacefont', 'url(fonts/spacefont/spacefont.ttf)', {style: 'normal', weight: 700});
+    junction_font.load().then(function (loaded_face) {
+        document.fonts.add(loaded_face);
+        fontLoaded();
+    }).catch(function (error) {
+        throw error;
+    });
+}
+
+function fontLoaded() {
     loadStructureTiles();
     loadStructures();
     loadStructureMatrixes();
@@ -73,8 +77,18 @@ function imagesLoaded() {
     refresh();
 }
 
+function initAbilities() {
+    new AbilityPew();
+}
+
+function initUI() {
+    GameManager.instance.combatOrderIndicator = new UiCombatOrderIndicator(100);
+    GameManager.instance.actionBar = new UIAbilityBar(100);
+    GameManager.instance.actionBar.addAbility("pew");
+}
+
 function spawnPlayerTransporter() {
-    new PlayerTransporter();
+    GameManager.instance.playerTransporter = new PlayerTransporter();
 }
 
 function addEventListeners() {
@@ -122,21 +136,30 @@ function mouseClick(evt) {
             GameManager.instance.player.tilemap.addTile(newTile);
             newTile.discovered = true;*/
         } else {
-            if (GameManager.instance.player.canMove) {
-                if (GameManager.instance.actionBar.selectedUiAbility !== null) {
-                    let ability = GameManager.instance.actionBar.selectedUiAbility.ability;
-                    if (ability.targeted) {
-                        let monster = GameManager.instance.monsterManager.getMonster(x, y);
-                        if (monster !== null) {
-                            ability.cast(GameManager.instance.player, monster);
-                            GameManager.instance.actionBar.deselectAll();
-                            GameManager.instance.battle.next();
-                        }
-                    }
-                } else {
-                    GameManager.instance.player.prepareMove(x, y);
+            clickedObject = searchForUI(evt.clientX, evt.clientY, GAME_LAYER);
+            if (clickedObject !== null) {
+                clickedObject.select();
+            } else {
+                doPlayerMovement(x, y);
+            }
+        }
+    }
+}
+
+function doPlayerMovement(x, y) {
+    if (GameManager.instance.player.canMove) {
+        if (GameManager.instance.actionBar.selectedUiAbility !== null) {
+            let ability = GameManager.instance.actionBar.selectedUiAbility.ability;
+            if (ability.targeted) {
+                let monster = GameManager.instance.monsterManager.getMonster(x, y);
+                if (monster !== null) {
+                    ability.cast(GameManager.instance.player, monster);
+                    GameManager.instance.actionBar.deselectAll();
+                    GameManager.instance.battle.next();
                 }
             }
+        } else {
+            GameManager.instance.player.prepareMove(x, y);
         }
     }
 }

@@ -109,6 +109,27 @@ class Tilemap {
         return tile;
     }
 
+    getTileByName(name) {
+        let result = null;
+        for (let i = 0; i < this.tileArray.length; i++) {
+            if (this.tileArray[i].name === name) {
+                result = this.tileArray[i];
+                break;
+            }
+        }
+        return result;
+    }
+
+    getTilesByName(name) {
+        let result = [];
+        for (let i = 0; i < this.tileArray.length; i++) {
+            if (name === this.tileArray[i].name) {
+                result.push(this.tileArray[i]);
+            }
+        }
+        return result;
+    }
+
     move(x, y, onDescriptor = false) {
         let arrayToUse = onDescriptor ? this.tileDescriptors : this.tileArray;
         for (let i = 0; i < arrayToUse.length; i++) {
@@ -146,8 +167,8 @@ class Tilemap {
 
     getLeftmostTiles() {
         let tiles = [];
-        let minX = canvas.width;
-        for (let i = 0; i < this.tileArray.length; i++) {
+        let minX = this.tileArray[0].x;
+        for (let i = 1; i < this.tileArray.length; i++) {
             let tile = this.tileArray[i];
             if (minX === tile.x) {
                 tiles.push(tile);
@@ -202,8 +223,9 @@ class TileDescriptor {
 }
 
 class Tile extends Drawable {
-    constructor(x, y, img, walkable, passesLight) {
+    constructor(x, y, name, img, walkable, passesLight) {
         super(x, y, img, 2);
+        this.name = name;
         this.walkable = walkable;
         this.passesLight = passesLight;
         this.discovered = false;
@@ -235,64 +257,5 @@ class Tile extends Drawable {
     }
 
     onLeave(stepper) {
-    }
-}
-
-class Door extends Tile {
-    constructor(x, y, img) {
-        super(x, y, img, true, false);
-        this.blocking = true;
-        this.triggerDoorEnter = new Trigger(this, "onDoorEnter");
-        this.triggerDoorLeave = new Trigger(this, "onDoorLeave");
-        this.openLength = this.descriptor.animationLength;
-    }
-
-    beforeStep(stepper) {
-        if (this.blocking) {
-            this.triggerDoorEnter.trigger();
-            this.blocking = false;
-            stepper.canMove = false;
-            new TimedEvent(this.openLength,
-                function (params) {
-                    params[0].canMove = true;
-                },
-                [stepper, this]
-            );
-        }
-    }
-
-    onStep(stepper) {
-        this.passesLight = true;
-    }
-
-    onLeave(stepper) {
-        this.blocking = true;
-        this.triggerDoorLeave.trigger();
-        new TimedEvent(this.openLength,
-            function (params) {
-                params.passesLight = false;
-                GameManager.instance.player.playerLighting.recalculateTiles();
-            },
-            this
-        );
-    }
-}
-
-class Wall extends Tile {
-    constructor(x, y, img) {
-        super(x, y, img, false, false);
-    }
-}
-
-class Floor extends Tile {
-    constructor(x, y, img = "tile") {
-        super(x, y, img, true, true);
-    }
-}
-
-class DecorTile extends Tile {
-    constructor(x, y, img) {
-        super(x, y, img, false, false);
-        this.visible = true;
     }
 }

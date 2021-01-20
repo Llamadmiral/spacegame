@@ -71,7 +71,7 @@ class RouteCreator {
             }
         }
 
-        if (this.openList.length != 0) {
+        if (this.openList.length !== 0) {
             if (this.closedList.indexOf(this.end) === -1) {
                 return this.createRoute();
             } else {
@@ -85,7 +85,7 @@ class RouteCreator {
     getNode(x, y) {
         let node = null;
         for (let i = 0; i < this.nodes.length; i++) {
-            if (x == this.nodes[i].x && y == this.nodes[i].y) {
+            if (x === this.nodes[i].x && y === this.nodes[i].y) {
                 node = this.nodes[i];
                 break;
             }
@@ -252,9 +252,9 @@ function paintSections(sections) {
 }
 
 function getRandomColor() {
-    var letters = '0123456789ABCDEF';
-    var color = '#';
-    for (var i = 0; i < 6; i++) {
+    let letters = '0123456789ABCDEF';
+    let color = '#';
+    for (let i = 0; i < 6; i++) {
         color += letters[Math.floor(Math.random() * 16)];
     }
     return color;

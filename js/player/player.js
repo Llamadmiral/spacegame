@@ -63,6 +63,6 @@ class AbilityPew extends Ability {
     }
 
     getDescription() {
-        return 'Deals ' + this.damage + ' damage to a single target.';
+        return 'Deals ' + this.damage + ' damage to a single target';
     }
 }
