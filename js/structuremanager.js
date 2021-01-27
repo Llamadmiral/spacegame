@@ -47,11 +47,11 @@ function generateShip() {
         let room = generateRoom(rooms[i]);
         ship.mergeDescriptors(room);
     }
-    let widthAndHeight = ship.getWidthAndHeight(true);
-    let offsetX = normalizeToGrid((canvas.width / 1.2) - (widthAndHeight[0] / 2));
-    let offsetY = normalizeToGrid((canvas.height / 2) - (widthAndHeight[1] / 2));
+    let offsetX = GameManager.instance.player.x + (TILE_SIZE * 32);
+    let offsetY = GameManager.instance.player.y - (TILE_SIZE * 32);
     addWalls(ship);
     ship.move(offsetX, offsetY, true);
+    console.log(offsetX, offsetY);
     return ship;
 }
 
@@ -191,6 +191,7 @@ class Ship extends Tilemap {
     constructor() {
         super();
         this.dockingTile = null;
+        this.observers = [];
     }
 
     build() {
@@ -209,8 +210,10 @@ class Ship extends Tilemap {
                 this.addTile(dockingTopTile);
                 this.addTile(dockingBottomTile);
                 let dockingAnimationGroup = new DockingDoorAnimation([this.dockingTile, dockingTopTile, dockingBottomTile]);
-                new Observer(this.dockingTile, dockingAnimationGroup, "onDoorEnter", dockingAnimationGroup.open);
-                new Observer(this.dockingTile, dockingAnimationGroup, "onDoorLeave", dockingAnimationGroup.close);
+                this.observers = [
+                    new Observer(this.dockingTile, dockingAnimationGroup, "onDoorEnter", dockingAnimationGroup.open),
+                    new Observer(this.dockingTile, dockingAnimationGroup, "onDoorLeave", dockingAnimationGroup.close)
+                ];
                 break;
             }
         }
@@ -218,6 +221,14 @@ class Ship extends Tilemap {
             console.log('Could not find docking tile...');
         }
         this.showAllTiles();
+    }
+
+    destroy() {
+        this.dockingTile = null;
+        this.observers.forEach(function (observer) {
+            observer.destroy();
+        });
+        this.observers = undefined;
     }
 }
 
@@ -229,6 +240,7 @@ class PlayerTransporter extends Updatable {
     static STATUS_DOCKING = 'docking';
     static STATUS_DOCKED = 'docked';
     static STATUS_UNDOCKING = 'startedUndocking';
+    static STATUS_GOING_TO_SPACE = 'goingToSpace';
 
     constructor() {
         super();
@@ -259,6 +271,8 @@ class PlayerTransporter extends Updatable {
     update() {
         if (this.status === PlayerTransporter.STATUS_ARRIVING_AT_DESTINATION) {
             this.arriveAtDestination();
+        } else if (this.status === PlayerTransporter.STATUS_GOING_TO_SPACE) {
+            this.goToSpace();
         }
     }
 
@@ -284,12 +298,39 @@ class PlayerTransporter extends Updatable {
         if (this.dockingTile.y !== this.otherShip.dockingTile.y) {
             offsetY = quickMode ? TILE_SIZE : moveSpeed;
         }
-        this.ship.move(offsetX, -offsetY);
-        GameManager.instance.player.x += offsetX;
-        GameManager.instance.player.y -= offsetY;
-        if (this.dockingTile.y === this.otherShip.dockingTile.y && this.dockingTile.x === this.otherShip.dockingTile.x - (6 * TILE_SIZE)) {
+        if (offsetX === 0 && offsetY === 0) {
             this.changeStatus(PlayerTransporter.STATUS_PARKED);
             this.ship.reassignKeys();
+        } else {
+            this.ship.move(offsetX, -offsetY);
+            GameManager.instance.player.x += offsetX;
+            GameManager.instance.player.y -= offsetY;
+        }
+    }
+
+    startGoingToSpace() {
+        this.changeStatus(PlayerTransporter.STATUS_GOING_TO_SPACE);
+    }
+
+    goToSpace() {
+        let quickMode = this.quickMode;
+        let offsetX = 0;
+        let offsetY = 0;
+        let moveSpeed = TILE_SIZE / 4;
+        if (this.dockingTile.x !== this.otherShip.dockingTile.x - (32 * TILE_SIZE)) {
+            offsetX = quickMode ? TILE_SIZE : moveSpeed;
+        }
+        if (this.dockingTile.y !== this.otherShip.dockingTile.y - (32 * TILE_SIZE)) {
+            offsetY = quickMode ? TILE_SIZE : moveSpeed;
+        }
+        if (offsetX === 0 && offsetY === 0) {
+            this.changeStatus(PlayerTransporter.STATUS_IN_SPACE);
+            this.ship.reassignKeys();
+            this.otherShip.destroy();
+        } else {
+            this.ship.move(-offsetX, -offsetY);
+            GameManager.instance.player.x -= offsetX;
+            GameManager.instance.player.y -= offsetY;
         }
     }
 
@@ -341,14 +382,6 @@ class PlayerTransporter extends Updatable {
                 param.changeStatus(PlayerTransporter.STATUS_PARKED);
             },
             this);
-        /*new TimedEvent(quickMode ? 10 : dockPartAddingTimeOffset * 6,
-            function (param) {
-                param.ship.mergeMap(param.otherShip);
-                param.dockingTunnel.mergeMap(param.ship);
-                param.navSystem.status = "docked";
-            },
-            this
-        );*/
     }
 
     changeStatus(newStatus) {

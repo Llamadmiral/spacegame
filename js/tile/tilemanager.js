@@ -251,6 +251,16 @@ class Tilemap {
         }
     }
 
+    destroy() {
+        this.map = {};
+        this.tileDescriptors = [];
+        this.tileArray.forEach(function (tile) {
+            tile.destroy();
+        });
+        this.tileArray = [];
+        this.subMaps = [];
+    }
+
 }
 
 class TileDescriptor {

@@ -95,7 +95,7 @@ class PlayerShipNavigation extends Tile {
                 ship.build();
                 GameManager.instance.playerTransporter.startArrivingAtDestination(ship);
             } else if (status === PlayerTransporter.STATUS_PARKED) {
-                console.log('Here will come the code that will send the ship back to space');
+                GameManager.instance.playerTransporter.startGoingToSpace();
             }
         }
     }

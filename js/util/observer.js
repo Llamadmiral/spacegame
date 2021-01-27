@@ -40,4 +40,9 @@ class Observer {
     invoke() {
         this.method.call(this.invocee);
     }
+
+    destroy() {
+        observerList.observers.splice(observerList.observers.indexOf(this), 1);
+    }
+
 }
