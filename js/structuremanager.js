@@ -222,20 +222,28 @@ class Ship extends Tilemap {
 }
 
 class PlayerTransporter extends Updatable {
+
+    static STATUS_IN_SPACE = 'inSpace';
+    static STATUS_ARRIVING_AT_DESTINATION = 'arrivingAtDestination';
+    static STATUS_PARKED = 'parked';
+    static STATUS_DOCKING = 'docking';
+    static STATUS_DOCKED = 'docked';
+    static STATUS_UNDOCKING = 'startedUndocking';
+
     constructor() {
         super();
         this.dockingTunnel = new Tilemap();
-        this.status = "inSpace";
+        this.status = PlayerTransporter.STATUS_IN_SPACE;
         this.quickMode = false;
         this.x = 0;
         this.y = 0;
         this.ship = LOADED_STRUCTURES["player_ship"].build(this.x, this.y);
         this.dockingTile = this.ship.getTileByName("docking_door_vertical_right");
-        this.navSystem = this.ship.getTileByName("TILE_nav_system");
         this.otherShip = null;
         let spawnPoint = this.ship.getTileByName("spawn_point");
         GameManager.instance.player = new Player(spawnPoint.x, spawnPoint.y, this.ship);
         GameManager.instance.cameraTarget = GameManager.instance.player;
+        this.statusTrigger = new Trigger(this, 'playerTransporterStatusChange');
         this.ship.showAllTiles();
         this.initDockingDoorAnimationGroup();
     }
@@ -249,7 +257,7 @@ class PlayerTransporter extends Updatable {
     }
 
     update() {
-        if (this.status === 'arrivingAtDestination') {
+        if (this.status === PlayerTransporter.STATUS_ARRIVING_AT_DESTINATION) {
             this.arriveAtDestination();
         }
     }
@@ -257,7 +265,7 @@ class PlayerTransporter extends Updatable {
     startArrivingAtDestination(otherShip) {
         if (otherShip.dockingTile !== null) {
             this.otherShip = otherShip;
-            this.status = 'arrivingAtDestination';
+            this.changeStatus(PlayerTransporter.STATUS_ARRIVING_AT_DESTINATION);
             GameManager.instance.monsterManager = new MonsterManager(3, this.otherShip);
             GameManager.instance.monsterManager.spawnMonsters();
         } else {
@@ -280,13 +288,13 @@ class PlayerTransporter extends Updatable {
         GameManager.instance.player.x += offsetX;
         GameManager.instance.player.y -= offsetY;
         if (this.dockingTile.y === this.otherShip.dockingTile.y && this.dockingTile.x === this.otherShip.dockingTile.x - (6 * TILE_SIZE)) {
-            this.status = 'parked';
+            this.changeStatus(PlayerTransporter.STATUS_PARKED);
             this.ship.reassignKeys();
         }
     }
 
     extendDockingTunnel() {
-        this.status = 'docking';
+        this.changeStatus(PlayerTransporter.STATUS_DOCKING);
         let quickMode = this.quickMode;
         let dockPartAddingTimeOffset = FPS / 4;
         for (let i = 1; i < 6; i++) {
@@ -309,7 +317,7 @@ class PlayerTransporter extends Updatable {
             function (param) {
                 param.ship.mergeMap(param.otherShip);
                 param.dockingTunnel.mergeMap(param.ship);
-                param.status = "docked";
+                param.changeStatus(PlayerTransporter.STATUS_DOCKED);
             },
             this
         );
@@ -317,7 +325,7 @@ class PlayerTransporter extends Updatable {
 
     retractDockingTunnel() {
         let quickMode = this.quickMode;
-        this.status = 'startedUndocking';
+        this.changeStatus(PlayerTransporter.STATUS_UNDOCKING);
         let dockPartAddingTimeOffset = FPS / 4;
         for (let i = 5; i > 0; i--) {
             let timeout = quickMode ? i : dockPartAddingTimeOffset * (5 - i + 1);
@@ -330,7 +338,7 @@ class PlayerTransporter extends Updatable {
                 [this, this.dockingTile, i]);
         }
         new TimedEvent(quickMode ? 10 : dockPartAddingTimeOffset * 6, function (param) {
-                param.status = 'parked';
+                param.changeStatus(PlayerTransporter.STATUS_PARKED);
             },
             this);
         /*new TimedEvent(quickMode ? 10 : dockPartAddingTimeOffset * 6,
@@ -341,5 +349,10 @@ class PlayerTransporter extends Updatable {
             },
             this
         );*/
+    }
+
+    changeStatus(newStatus) {
+        this.status = newStatus;
+        this.statusTrigger.trigger();
     }
 }

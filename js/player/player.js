@@ -8,7 +8,6 @@ class Player extends Moveable {
         this.health = 100;
         this.maxHealth = 100;
         this.isInBattle = false;
-        this.selectedAction = null;
     }
 
     battleLogic() {

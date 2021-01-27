@@ -164,6 +164,7 @@ class Tilemap {
         Array.prototype.push.apply(newSubMaps, this.subMaps);
         newSubMaps.push(this);
         newSubMaps.push(otherMap);
+        newSubMaps = [...new Set(newSubMaps)];
         for (let i = 0; i < newSubMaps.length; i++) {
             let currentMap = newSubMaps[i];
             let newSubMapCopy = [...newSubMaps];

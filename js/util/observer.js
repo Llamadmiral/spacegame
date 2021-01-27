@@ -34,7 +34,7 @@ class Observer {
     }
 
     matches(action) {
-        return this.invoker === action.invoker && this.triggerName === action.triggerName;
+        return ((this.invoker === null) || (this.invoker === action.invoker)) && this.triggerName === action.triggerName;
     }
 
     invoke() {
