@@ -137,7 +137,7 @@ function mouseClick(evt) {
             newTile.discovered = true;*/
         } else {
             clickedObject = searchForUI(evt.clientX, evt.clientY, GAME_LAYER);
-            if (clickedObject !== null) {
+            if (clickedObject !== null && clickedObject.clickable) {
                 clickedObject.select();
             } else {
                 doPlayerMovement(x, y);

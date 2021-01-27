@@ -76,13 +76,56 @@ class PlayerShipNavigation extends Tile {
     }
 
     select() {
-        let ship = generateShip();
-        ship.move(GameManager.instance.playerTransporter.x + (TILE_SIZE), GameManager.instance.playerTransporter.y - (TILE_SIZE * 15), true);
-        ship.build();
-        GameManager.instance.playerTransporter.startArrivingAtDestination(ship);
-        console.log('selected!');
+        if (GameManager.instance.playerTransporter.status === "inSpace") {
+            let ship = generateShip();
+            ship.move(GameManager.instance.playerTransporter.x + (TILE_SIZE), GameManager.instance.playerTransporter.y - (TILE_SIZE * 15), true);
+            ship.build();
+            GameManager.instance.playerTransporter.startArrivingAtDestination(ship);
+        }
     }
 
     unselect() {
     }
+}
+
+class PlayerShipDockSwitch extends Tile {
+    constructor(x, y, img) {
+        super(x, y, img, img, false, false);
+        this.visible = true;
+        this.mouseInteractionWrapper = new MouseInteractionWrapper(this, TILE_SIZE, TILE_SIZE, true, true, 11);
+        this.tooltip = new UIToolTip(0, 0, 10, TILE_SIZE, "Not available at the moment");
+    }
+
+    hover() {
+        this.tooltip.x = this.x - camera.x;
+        this.tooltip.y = this.y - (TILE_SIZE * 2) - camera.y;
+        let status = GameManager.instance.playerTransporter.status;
+        if (status === 'docked') {
+            this.tooltip.changeText('Retract docking tunnel');
+        } else if (status === 'parked') {
+            this.tooltip.changeText('Extend docking tunnel');
+        } else {
+            this.tooltip.changeText("Not available at the moment");
+        }
+        this.tooltip.showTooltip = true;
+    }
+
+    hoverLeave() {
+        this.tooltip.showTooltip = false;
+    }
+
+    select() {
+        if (GameManager.instance.playerTransporter.status === 'docked') {
+            GameManager.instance.playerTransporter.retractDockingTunnel();
+            this.tooltip.changeText("Not available at the moment");
+        } else if (GameManager.instance.playerTransporter.status === 'parked') {
+            GameManager.instance.playerTransporter.extendDockingTunnel();
+            this.tooltip.changeText("Not available at the moment");
+        }
+    }
+
+    unselect() {
+
+    }
+
 }

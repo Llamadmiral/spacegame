@@ -224,13 +224,14 @@ class Ship extends Tilemap {
 class PlayerTransporter extends Updatable {
     constructor() {
         super();
-        this.isArriving = false;
-        this.arrived = false;
-        this.startedDocking = false;
+        this.dockingTunnel = new Tilemap();
+        this.status = "inSpace";
+        this.quickMode = false;
         this.x = 0;
         this.y = 0;
         this.ship = LOADED_STRUCTURES["player_ship"].build(this.x, this.y);
         this.dockingTile = this.ship.getTileByName("docking_door_vertical_right");
+        this.navSystem = this.ship.getTileByName("TILE_nav_system");
         this.otherShip = null;
         let spawnPoint = this.ship.getTileByName("spawn_point");
         GameManager.instance.player = new Player(spawnPoint.x, spawnPoint.y, this.ship);
@@ -248,21 +249,15 @@ class PlayerTransporter extends Updatable {
     }
 
     update() {
-        if (this.isArriving) {
-            let quickMode = false;
-            if (!this.arrived) {
-                this.arriveAtDestination(quickMode);
-            } else if (!this.startedDocking) {
-                this.startDocking(quickMode);
-                this.isArriving = false;
-            }
+        if (this.status === 'arrivingAtDestination') {
+            this.arriveAtDestination();
         }
     }
 
     startArrivingAtDestination(otherShip) {
         if (otherShip.dockingTile !== null) {
-            this.isArriving = true;
             this.otherShip = otherShip;
+            this.status = 'arrivingAtDestination';
             GameManager.instance.monsterManager = new MonsterManager(3, this.otherShip);
             GameManager.instance.monsterManager.spawnMonsters();
         } else {
@@ -270,7 +265,8 @@ class PlayerTransporter extends Updatable {
         }
     }
 
-    arriveAtDestination(quickMode) {
+    arriveAtDestination() {
+        let quickMode = this.quickMode;
         let offsetX = 0;
         let offsetY = 0;
         let moveSpeed = TILE_SIZE / 4;
@@ -284,13 +280,14 @@ class PlayerTransporter extends Updatable {
         GameManager.instance.player.x += offsetX;
         GameManager.instance.player.y -= offsetY;
         if (this.dockingTile.y === this.otherShip.dockingTile.y && this.dockingTile.x === this.otherShip.dockingTile.x - (6 * TILE_SIZE)) {
-            this.arrived = true;
+            this.status = 'parked';
+            this.ship.reassignKeys();
         }
     }
 
-    startDocking(quickMode) {
-        this.ship.reassignKeys();
-        this.startedDocking = true;
+    extendDockingTunnel() {
+        this.status = 'docking';
+        let quickMode = this.quickMode;
         let dockPartAddingTimeOffset = FPS / 4;
         for (let i = 1; i < 6; i++) {
             let timeout = quickMode ? i : dockPartAddingTimeOffset * i;
@@ -302,17 +299,47 @@ class PlayerTransporter extends Updatable {
                     bridgeFloor.discovered = true;
                     bridgeTop.discovered = true;
                     bridgeBottom.discovered = true;
-                    params[0].addTile(bridgeTop);
-                    params[0].addTile(bridgeFloor);
-                    params[0].addTile(bridgeBottom);
+                    params[0].dockingTunnel.addTile(bridgeTop);
+                    params[0].dockingTunnel.addTile(bridgeFloor);
+                    params[0].dockingTunnel.addTile(bridgeBottom);
                 },
-                [this.ship, this.dockingTile, i]);
+                [this, this.dockingTile, i]);
         }
         new TimedEvent(quickMode ? 10 : dockPartAddingTimeOffset * 6,
             function (param) {
-                param.ship.mergeMap(param.otherShip)
+                param.ship.mergeMap(param.otherShip);
+                param.dockingTunnel.mergeMap(param.ship);
+                param.status = "docked";
             },
             this
         );
+    }
+
+    retractDockingTunnel() {
+        let quickMode = this.quickMode;
+        this.status = 'startedUndocking';
+        let dockPartAddingTimeOffset = FPS / 4;
+        for (let i = 5; i > 0; i--) {
+            let timeout = quickMode ? i : dockPartAddingTimeOffset * (5 - i + 1);
+            new TimedEvent(timeout,
+                function (params) {
+                    params[0].dockingTunnel.removeTile(params[1].x + TILE_SIZE * params[2], params[1].y - TILE_SIZE, true);
+                    params[0].dockingTunnel.removeTile(params[1].x + TILE_SIZE * params[2], params[1].y, true);
+                    params[0].dockingTunnel.removeTile(params[1].x + TILE_SIZE * params[2], params[1].y + TILE_SIZE, true);
+                },
+                [this, this.dockingTile, i]);
+        }
+        new TimedEvent(quickMode ? 10 : dockPartAddingTimeOffset * 6, function (param) {
+                param.status = 'parked';
+            },
+            this);
+        /*new TimedEvent(quickMode ? 10 : dockPartAddingTimeOffset * 6,
+            function (param) {
+                param.ship.mergeMap(param.otherShip);
+                param.dockingTunnel.mergeMap(param.ship);
+                param.navSystem.status = "docked";
+            },
+            this
+        );*/
     }
 }

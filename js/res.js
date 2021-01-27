@@ -51,6 +51,7 @@ const IMAGES = [
     {"name": "TILE_Floor_Plain_B_EWWE", "src": "img/ship/floor/TILE_FLOOR_Plain_B_EWWE.png"},
     {"name": "ship_inner_wing_left", "src": "img/ship/ship_inner_wing_left.png"},
     {"name": "TILE_nav_system", "src": "img/ship/TILE_nav_system.png"},
+    {"name": "TILE_dock_switch", "src": "img/ship/TILE_dock_switch.png"},
     {"name": "ship_middle_wing_left", "src": "img/ship/ship_middle_wing_left.png", "anim": true, "numberOfFrames": 4},
     {"name": "ship_middle_wing_right", "src": "img/ship/ship_middle_wing_right.png", "anim": true, "numberOfFrames": 4},
 
@@ -152,7 +153,7 @@ const IMAGES = [
 const STRUCTURES = [
     {
         "name": "player_ship", "tiles": [
-            ["tile_debug", "tile_debug", "tile_debug", "TILE_nav_system", "tile_debug", "tile_debug", "tile_debug"],
+            ["tile_debug", "tile_debug", "tile_debug", "TILE_nav_system", "tile_debug", "TILE_dock_switch", "tile_debug"],
             ["tile_debug", "ship_tile", "ship_tile", "spawn_point", "ship_tile", "ship_tile", "docking_door_vertical_top_right"],
             ["tile_debug", "ship_tile", "ship_tile", "ship_tile", "ship_tile", "ship_tile", "docking_door_vertical_right"],
             ["tile_debug", "ship_tile", "ship_tile", "ship_tile", "ship_tile", "ship_tile", "docking_door_vertical_bottom_right"],
@@ -340,6 +341,13 @@ const STRUCTURE_TILES = [
         "passesLight": false,
         "clazz": PlayerShipNavigation,
         "tileImage": "TILE_nav_system"
+    },
+    {
+        "name": "TILE_dock_switch",
+        "walkable": false,
+        "passesLight": false,
+        "clazz": PlayerShipDockSwitch,
+        "tileImage": "TILE_dock_switch"
     },
 ];
 

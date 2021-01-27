@@ -9,6 +9,7 @@ class Tilemap {
         this.map = {};
         this.tileDescriptors = [];
         this.tileArray = [];
+        this.subMaps = [];
     }
 
     addTileDescriptor(x, y, structureTile) {
@@ -101,10 +102,18 @@ class Tilemap {
         return neighbours;
     }
 
-    getTile(x, y) {
+    getTile(x, y, deep = true) {
         let tile = undefined;
         if (this.map[x] !== undefined) {
             tile = this.map[x][y];
+        }
+        if (deep && tile === undefined) {
+            for (let i = 0; i < this.subMaps.length; i++) {
+                tile = this.subMaps[i].getTile(x, y, false);
+                if (tile !== undefined) {
+                    break;
+                }
+            }
         }
         return tile;
     }
@@ -140,17 +149,26 @@ class Tilemap {
 
     reassignKeys() {
         this.map = {};
-        let tileArray = this.tileArray;
-        this.tileArray = [];
-        for (let i = 0; i < tileArray.length; i++) {
-            this.addTile(tileArray[i]);
+        for (let i = 0; i < this.tileArray.length; i++) {
+            let tile = this.tileArray[i];
+            if (this.map[tile.x] === undefined) {
+                this.map[tile.x] = {};
+            }
+            this.map[tile.x][tile.y] = tile;
         }
     }
 
     mergeMap(otherMap) {
-        let otherArray = otherMap.tileArray;
-        for (let i = 0; i < otherArray.length; i++) {
-            this.addTile(otherArray[i]);
+        let newSubMaps = [];
+        Array.prototype.push.apply(newSubMaps, otherMap.subMaps);
+        Array.prototype.push.apply(newSubMaps, this.subMaps);
+        newSubMaps.push(this);
+        newSubMaps.push(otherMap);
+        for (let i = 0; i < newSubMaps.length; i++) {
+            let currentMap = newSubMaps[i];
+            let newSubMapCopy = [...newSubMaps];
+            newSubMapCopy.splice(newSubMapCopy.indexOf(currentMap), 1);
+            currentMap.subMaps = newSubMapCopy;
         }
     }
 
@@ -162,6 +180,9 @@ class Tilemap {
         this.tileArray.forEach(function (tile) {
             tile.visible = true;
             tile.discovered = true;
+        });
+        this.subMaps.forEach(function (map) {
+            map.showAllTiles();
         });
     }
 
@@ -207,6 +228,26 @@ class Tilemap {
 
     getRandomTile() {
         return this.tileArray[rnd(0, this.tileArray.length)];
+    }
+
+    collectTiles() {
+        let allTileArray = [];
+        for (let i = 0; i < this.subMaps.length; i++) {
+            Array.prototype.push.apply(allTileArray, this.subMaps[i].tileArray);
+        }
+        Array.prototype.push.apply(allTileArray, this.tileArray);
+        return allTileArray;
+    }
+
+    removeTile(x, y, destroy) {
+        let tile = this.getTile(x, y, false);
+        if (tile !== undefined) {
+            this.tileArray.splice(this.tileArray.indexOf(tile), 1);
+            this.map[x][y] = undefined;
+            if (destroy) {
+                tile.destroy();
+            }
+        }
     }
 
 }
@@ -257,5 +298,12 @@ class Tile extends Drawable {
     }
 
     onLeave(stepper) {
+    }
+
+    destroy() {
+        if (this.fogOfWarEffect !== undefined) {
+            this.fogOfWarEffect.destroy();
+        }
+        super.destroy();
     }
 }

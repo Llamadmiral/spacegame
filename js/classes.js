@@ -189,8 +189,8 @@ class Moveable extends Damageable {
         let diffY = y - this.y;
         if (diffX !== 0 || diffY !== 0) {
             let endTile = this.tilemap.getTile(x, y);
-            if (this.tilemap.tileArray.indexOf(endTile) !== -1) {
-                let routeCreator = new RouteCreator(this.tilemap.tileArray, this.currentTile, endTile);
+            if (endTile !== undefined) {
+                let routeCreator = new RouteCreator(this.tilemap.collectTiles(), this.currentTile, endTile);
                 let route = routeCreator.createRoute();
                 this.path = flattenRoute(route, this.tilemap);
             } else {

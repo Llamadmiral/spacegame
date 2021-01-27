@@ -69,6 +69,11 @@ class UIToolTip extends UiElement {
             context.fillText(this.text, this.x - (width / 2) + (widthPadding / 2), this.y + this.height - heightPadding);
         }
     }
+
+    changeText(newText) {
+        this.text = newText;
+        this.measurement = context.measureText(this.text).width;
+    }
 }
 
 class UiCombatOrderIndicator extends UiOpenable {
