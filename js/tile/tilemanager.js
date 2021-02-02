@@ -261,6 +261,10 @@ class Tilemap {
         this.subMaps = [];
     }
 
+    disconnect(){
+        this.subMaps = [];
+    }
+
 }
 
 class TileDescriptor {

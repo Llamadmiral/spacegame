@@ -223,6 +223,11 @@ class Moveable extends Damageable {
             }
         }
     }
+
+    destroy(){
+        super.destroy();
+        this.pathEffect.destroy();
+    }
 }
 
 class TimedEvent extends Updatable {

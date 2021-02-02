@@ -78,6 +78,14 @@ class MonsterManager {
         this.monsters.splice(this.monsters.indexOf(monster), 1);
     }
 
+    destroy() {
+        this.monsters.forEach(function (monster) {
+            monster.destroy();
+        });
+        this.monsters = [];
+        this.tileset = [];
+    }
+
 }
 
 function canASeeB(a, b, range) {

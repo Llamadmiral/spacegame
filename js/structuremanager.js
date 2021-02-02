@@ -192,6 +192,7 @@ class Ship extends Tilemap {
         super();
         this.dockingTile = null;
         this.observers = [];
+        this.dockingAnimationGroup = null;
     }
 
     build() {
@@ -209,10 +210,10 @@ class Ship extends Tilemap {
                 this.addTile(this.dockingTile);
                 this.addTile(dockingTopTile);
                 this.addTile(dockingBottomTile);
-                let dockingAnimationGroup = new DockingDoorAnimation([this.dockingTile, dockingTopTile, dockingBottomTile]);
+                this.dockingAnimationGroup = new DockingDoorAnimation([this.dockingTile, dockingTopTile, dockingBottomTile]);
                 this.observers = [
-                    new Observer(this.dockingTile, dockingAnimationGroup, "onDoorEnter", dockingAnimationGroup.open),
-                    new Observer(this.dockingTile, dockingAnimationGroup, "onDoorLeave", dockingAnimationGroup.close)
+                    new Observer(this.dockingTile, this.dockingAnimationGroup, "onDoorEnter", this.dockingAnimationGroup.open),
+                    new Observer(this.dockingTile, this.dockingAnimationGroup, "onDoorLeave", this.dockingAnimationGroup.close)
                 ];
                 break;
             }
@@ -224,11 +225,14 @@ class Ship extends Tilemap {
     }
 
     destroy() {
+        this.dockingAnimationGroup.destroy();
+        this.dockingAnimationGroup = [];
         this.dockingTile = null;
         this.observers.forEach(function (observer) {
             observer.destroy();
         });
-        this.observers = undefined;
+        this.observers = [];
+        super.destroy();
     }
 }
 
@@ -278,6 +282,11 @@ class PlayerTransporter extends Updatable {
 
     startArrivingAtDestination(otherShip) {
         if (otherShip.dockingTile !== null) {
+            if (this.otherShip !== null) {
+                this.ship.disconnect();
+                this.otherShip.destroy();
+                GameManager.instance.monsterManager.destroy();
+            }
             this.otherShip = otherShip;
             this.changeStatus(PlayerTransporter.STATUS_ARRIVING_AT_DESTINATION);
             GameManager.instance.monsterManager = new MonsterManager(3, this.otherShip);
@@ -326,7 +335,6 @@ class PlayerTransporter extends Updatable {
         if (offsetX === 0 && offsetY === 0) {
             this.changeStatus(PlayerTransporter.STATUS_IN_SPACE);
             this.ship.reassignKeys();
-            this.otherShip.destroy();
         } else {
             this.ship.move(-offsetX, -offsetY);
             GameManager.instance.player.x -= offsetX;

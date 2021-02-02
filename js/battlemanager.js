@@ -40,8 +40,6 @@ class Battle {
         }
         if (indexToRemove > -1) {
             this.participants.splice(indexToRemove, 1);
-        } else {
-            console.log('Unable to find participant', participant);
         }
     }
 
